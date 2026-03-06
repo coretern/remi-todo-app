@@ -17,8 +17,10 @@
         ]
       }
     },
+    "jsEngine": "hermes",
     "android": {
       "package": "com.remi.todoapp",
+      "jsEngine": "hermes",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
@@ -28,7 +30,6 @@
       "permissions": [
         "NOTIFICATIONS",
         "SCHEDULE_EXACT_ALARM",
-        "VIBRATE",
         "RECEIVE_BOOT_COMPLETED"
       ],
       "intentFilters": [

@@ -1,9 +1,8 @@
 import { Ionicons } from '@expo/vector-icons';
 import { DrawerActions } from '@react-navigation/native';
-import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useNavigation } from 'expo-router';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useRef, useState } from 'react';
 import {
     ActivityIndicator,
     Animated,
@@ -20,7 +19,6 @@ import {
     UIManager,
     View,
 } from 'react-native';
-import ConfettiCannon from 'react-native-confetti-cannon';
 import AddTodoInput from '../components/todo/AddTodoInput';
 import TodoItem from '../components/todo/TodoItem/TodoItem';
 import { useTodos } from '../hooks/useTodos';
@@ -44,16 +42,6 @@ export default function HomeScreen() {
         completedCount
     } = useTodos();
 
-    const [showConfetti, setShowConfetti] = useState(false);
-
-    // Watch for "All Accomplished" moment
-    useEffect(() => {
-        if (count > 0 && completedCount === count) {
-            setShowConfetti(true);
-            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-            setTimeout(() => setShowConfetti(false), 5000);
-        }
-    }, [completedCount, count]);
 
     const handleOpenDrawer = () => {
         navigation.dispatch(DrawerActions.openDrawer());
@@ -62,25 +50,21 @@ export default function HomeScreen() {
     const handleAdd = (text: string, due?: number) => {
         LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
         addTodo(text, due);
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     };
 
     const toggleTodo = (id: string) => {
         LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
         originalToggleTodo(id);
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     };
 
     const deleteTodo = (id: string) => {
         LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
         originalDeleteTodo(id);
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     };
 
     const clearCompleted = () => {
         LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
         originalClearCompleted();
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     };
 
     const handleShare = async () => {
@@ -93,13 +77,12 @@ export default function HomeScreen() {
         }
     };
 
-    const [filter, setFilter] = useState<'All' | 'Active' | 'Completed'>('All');
+    const [filter, setFilter] = useState<'Active' | 'Completed'>('Active');
     const scrollY = useRef(new Animated.Value(0)).current;
 
     const filteredTodos = todos.filter(t => {
         if (filter === 'Active') return !t.completed;
-        if (filter === 'Completed') return t.completed;
-        return true;
+        return t.completed;
     });
 
     // Dashboard Header Animation (GPU-Driven)
@@ -216,7 +199,7 @@ export default function HomeScreen() {
                             {/* iOS Segmented Control Style Filter */}
                             <View style={styles.segmentedContainer}>
                                 <View style={styles.segmentedControl}>
-                                    {(['All', 'Active', 'Completed'] as const).map(f => (
+                                    {(['Active', 'Completed'] as const).map(f => (
                                         <TouchableOpacity
                                             key={f}
                                             onPress={() => {
@@ -243,42 +226,27 @@ export default function HomeScreen() {
                     }
                 />
 
-                {/* Floating Input Area (Floats above Navbar) */}
-                <View style={styles.inputWrapper}>
-                    <AddTodoInput onAdd={handleAdd} />
-                </View>
-
-                {/* iPhone-Style Floating Glassy Navbar */}
-                <View style={styles.glassNav}>
-                    <TouchableOpacity style={styles.navTab} onPress={() => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)}>
-                        <Ionicons name="grid" size={24} color="#007AFF" />
-                        <Text style={[styles.navLabel, { color: '#007AFF' }]}>Missions</Text>
-                    </TouchableOpacity>
-
-                    <TouchableOpacity style={styles.navTab} onPress={() => {
-                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                        navigation.navigate('history' as never);
-                    }}>
-                        <Ionicons name="time-outline" size={24} color="#8E8E93" />
-                        <Text style={styles.navLabel}>History</Text>
-                    </TouchableOpacity>
-
-                    <TouchableOpacity style={styles.navTab} onPress={() => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)}>
-                        <Ionicons name="stats-chart-outline" size={24} color="#8E8E93" />
-                        <Text style={styles.navLabel}>Insights</Text>
-                    </TouchableOpacity>
-                </View>
-
-                {/* Celebration Overlay */}
-                {showConfetti && (
-                    <View style={StyleSheet.absoluteFill} pointerEvents="none">
-                        <ConfettiCannon
-                            count={200}
-                            origin={{ x: Dimensions.get('window').width / 2, y: -20 }}
-                            fadeOut={true}
-                        />
+                {/* Premium Floating Action Dock */}
+                <View style={styles.footerDock}>
+                    <LinearGradient
+                        colors={['transparent', 'rgba(242, 242, 247, 0.8)', '#F2F2F7']}
+                        style={StyleSheet.absoluteFill}
+                        pointerEvents="none"
+                    />
+                    <View style={styles.dockHandle} />
+                    <View style={styles.inputShadow}>
+                        <AddTodoInput onAdd={handleAdd} />
                     </View>
-                )}
+                </View>
+
+                {/* Bottom Fade Mask (Ensures list transparency is clean) */}
+                <LinearGradient
+                    colors={['transparent', 'rgba(242, 242, 247, 0.95)', '#F2F2F7']}
+                    style={styles.bottomMask}
+                    pointerEvents="none"
+                />
+
+                {/* Celebration Overlay Removal */}
             </KeyboardAvoidingView>
         </View>
     );
@@ -438,55 +406,44 @@ const styles = StyleSheet.create({
     },
     listContainer: {
         paddingHorizontal: 16,
-        paddingBottom: 180, // Extra space for navbar + input
+        paddingBottom: 160, // Perfect clearance for the new dock
     },
-    inputWrapper: {
+    footerDock: {
         position: 'absolute',
-        bottom: 100,
+        bottom: 0,
         left: 0,
         right: 0,
+        paddingBottom: Platform.OS === 'ios' ? 40 : 25,
+        paddingHorizontal: 20,
         zIndex: 2000,
+        alignItems: 'center',
     },
-    glassNav: {
+    dockHandle: {
+        width: 36,
+        height: 5,
+        backgroundColor: 'rgba(0, 0, 0, 0.1)',
+        borderRadius: 2.5,
+        marginBottom: 8,
+    },
+    inputShadow: {
+        width: '100%',
+        maxWidth: 500, // Better for tablets/web
+    },
+    bottomMask: {
         position: 'absolute',
-        bottom: 30,
-        left: 20,
-        right: 20,
-        height: 70,
-        backgroundColor: 'rgba(255, 255, 255, 0.9)',
-        borderRadius: 35,
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-around',
-        paddingHorizontal: 10,
-        // iOS Glass Shadow
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 10 },
-        shadowOpacity: 0.1,
-        shadowRadius: 20,
-        elevation: 10,
-        borderWidth: 1,
-        borderColor: 'rgba(255, 255, 255, 0.5)',
-        zIndex: 3000,
-    },
-    navTab: {
-        alignItems: 'center',
-        justifyContent: 'center',
-        flex: 1,
-    },
-    navLabel: {
-        fontSize: 10,
-        fontWeight: '700',
-        color: '#8E8E93',
-        marginTop: 4,
+        bottom: 0,
+        left: 0,
+        right: 0,
+        height: 140,
+        zIndex: 1000,
     },
     emptyContainer: {
-        marginTop: 60,
         alignItems: 'center',
+        paddingVertical: 100,
     },
     emptyText: {
-        color: '#999',
         fontSize: 16,
+        color: '#BBB',
         fontWeight: '500',
         marginTop: 12,
     },

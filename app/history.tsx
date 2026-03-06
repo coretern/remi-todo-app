@@ -123,24 +123,6 @@ export default function HistoryScreen() {
                     }
                 />
             </SafeAreaView>
-
-            {/* iPhone-Style Floating Glassy Navbar */}
-            <View style={styles.glassNav}>
-                <TouchableOpacity style={styles.navTab} onPress={() => router.replace('/')}>
-                    <Ionicons name="grid-outline" size={24} color="#8E8E93" />
-                    <Text style={styles.navLabel}>Missions</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity style={styles.navTab} onPress={() => { }}>
-                    <Ionicons name="time" size={24} color="#2ED573" />
-                    <Text style={[styles.navLabel, { color: '#2ED573' }]}>History</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity style={styles.navTab} onPress={() => { }}>
-                    <Ionicons name="stats-chart-outline" size={24} color="#8E8E93" />
-                    <Text style={styles.navLabel}>Insights</Text>
-                </TouchableOpacity>
-            </View>
         </View>
     );
 }
@@ -195,44 +177,11 @@ const styles = StyleSheet.create({
     listContent: {
         padding: 20,
         paddingTop: 0,
-        paddingBottom: 120, // Space for navbar
+        paddingBottom: 40, // Reduced space now that navbar is gone
     },
     mainContainer: {
         flex: 1,
         backgroundColor: '#F8F9FA',
-    },
-    glassNav: {
-        position: 'absolute',
-        bottom: 30,
-        left: 20,
-        right: 20,
-        height: 70,
-        backgroundColor: 'rgba(255, 255, 255, 0.9)',
-        borderRadius: 35,
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-around',
-        paddingHorizontal: 10,
-        // iOS Glass Shadow
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 10 },
-        shadowOpacity: 0.1,
-        shadowRadius: 20,
-        elevation: 10,
-        borderWidth: 1,
-        borderColor: 'rgba(255, 255, 255, 0.5)',
-        zIndex: 3000,
-    },
-    navTab: {
-        alignItems: 'center',
-        justifyContent: 'center',
-        flex: 1,
-    },
-    navLabel: {
-        fontSize: 10,
-        fontWeight: '700',
-        color: '#8E8E93',
-        marginTop: 4,
     },
     historyItem: {
         backgroundColor: 'white',
@@ -304,5 +253,5 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         marginTop: 8,
         lineHeight: 20,
-    }
+    },
 });

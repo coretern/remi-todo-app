@@ -6,14 +6,23 @@ import { Linking, Platform, SafeAreaView, ScrollView, StyleSheet, Text, Touchabl
 export default function HelpScreen() {
     const router = useRouter();
     const supportEmail = 'anilarangi6@gmail.com';
+    const feedbackFormUrl = 'https://forms.gle/1UTNrqfhKqRgEq138';
 
     const handleContact = () => {
-        const mailUrl = `mailto:${supportEmail}?subject=Support Request - Premium Todo`;
+        const mailUrl = `mailto:${supportEmail}?subject=Support Request - Remi Todo`;
 
         if (Platform.OS === 'web') {
             window.open(mailUrl);
         } else {
             Linking.openURL(mailUrl);
+        }
+    };
+
+    const handleFeedback = () => {
+        if (Platform.OS === 'web') {
+            window.open(feedbackFormUrl);
+        } else {
+            Linking.openURL(feedbackFormUrl);
         }
     };
 
@@ -31,7 +40,7 @@ export default function HelpScreen() {
                         <Ionicons name="arrow-back" size={24} color="white" />
                     </TouchableOpacity>
                 ),
-                headerStyle: { backgroundColor: '#0a7ea4' },
+                headerStyle: { backgroundColor: '#007AFF' },
                 headerTintColor: 'white',
             }} />
 
@@ -45,12 +54,23 @@ export default function HelpScreen() {
                     <Text style={styles.bannerSubtitle}>We are here to support your productivity journey</Text>
                 </View>
 
+                {/* Feedback Section - NEW */}
+                <View style={styles.feedbackCard}>
+                    <Ionicons name="chatbubble-ellipses-outline" size={32} color="#007AFF" />
+                    <Text style={styles.feedbackTitle}>Share Your Feedback</Text>
+                    <Text style={styles.feedbackSubtitle}>Your suggestions help us improve Remi Todo for everyone.</Text>
+                    <TouchableOpacity style={styles.feedbackBtn} onPress={handleFeedback}>
+                        <Text style={styles.feedbackBtnText}>Give Feedback</Text>
+                        <Ionicons name="open-outline" size={18} color="white" style={{ marginLeft: 8 }} />
+                    </TouchableOpacity>
+                </View>
+
                 {/* FAQ Section */}
                 <View style={styles.section}>
                     <Text style={styles.sectionLabel}>Quick FAQ</Text>
                     <FAQItem
-                        question="How do I set an alarm?"
-                        answer="Click the alarm icon next to 'New Mission', select your time (AM/PM), then add the task."
+                        question="How do I add a mission?"
+                        answer="Simply type your task in the 'New Mission' box at the bottom and tap the arrow icon."
                     />
                     <FAQItem
                         question="Is my data safe?"
@@ -58,7 +78,7 @@ export default function HelpScreen() {
                     />
                     <FAQItem
                         question="Can I use this on Web?"
-                        answer="Yes! But push notifications (alarms) are optimized for mobile devices."
+                        answer="Yes! Remi Todo is fully responsive and works beautifully on all your devices."
                     />
                 </View>
 
@@ -66,7 +86,7 @@ export default function HelpScreen() {
                 <View style={styles.contactCard}>
                     <Text style={styles.contactTitle}>Get in Touch</Text>
                     <Text style={styles.contactText}>
-                        If you have any questions or need technical support, please reach out to us directly via email.
+                        If you have any questions or need technical support, please reach out via email.
                     </Text>
 
                     <TouchableOpacity style={styles.emailBtn} onPress={handleContact}>
@@ -97,7 +117,7 @@ const FAQItem = ({ question, answer }: { question: string, answer: string }) => 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#F8F9FA',
+        backgroundColor: '#F2F2F7',
     },
     scrollContent: {
         paddingBottom: 40,
@@ -107,21 +127,21 @@ const styles = StyleSheet.create({
         padding: 8,
     },
     banner: {
-        backgroundColor: '#0a7ea4',
-        paddingVertical: 50,
+        backgroundColor: '#007AFF',
+        paddingVertical: 40,
         paddingHorizontal: 20,
         alignItems: 'center',
         borderBottomLeftRadius: 40,
         borderBottomRightRadius: 40,
     },
     iconCircle: {
-        width: 90,
-        height: 90,
-        borderRadius: 45,
+        width: 80,
+        height: 80,
+        borderRadius: 40,
         backgroundColor: 'rgba(255,255,255,0.2)',
         alignItems: 'center',
         justifyContent: 'center',
-        marginBottom: 20,
+        marginBottom: 16,
     },
     bannerTitle: {
         fontSize: 26,
@@ -134,35 +154,75 @@ const styles = StyleSheet.create({
         marginTop: 8,
         textAlign: 'center',
     },
+    feedbackCard: {
+        margin: 20,
+        backgroundColor: 'white',
+        borderRadius: 24,
+        padding: 24,
+        alignItems: 'center',
+        shadowColor: '#000',
+        shadowOpacity: 0.05,
+        shadowRadius: 15,
+        elevation: 5,
+    },
+    feedbackTitle: {
+        fontSize: 18,
+        fontWeight: '800',
+        color: '#1C1C1E',
+        marginTop: 12,
+    },
+    feedbackSubtitle: {
+        fontSize: 13,
+        color: '#8E8E93',
+        textAlign: 'center',
+        marginTop: 6,
+        marginBottom: 18,
+    },
+    feedbackBtn: {
+        backgroundColor: '#007AFF',
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingHorizontal: 24,
+        paddingVertical: 12,
+        borderRadius: 16,
+    },
+    feedbackBtnText: {
+        color: 'white',
+        fontWeight: '700',
+        fontSize: 15,
+    },
     section: {
         paddingHorizontal: 20,
-        marginTop: 30,
+        marginTop: 10,
     },
     sectionLabel: {
-        fontSize: 14,
+        fontSize: 13,
         fontWeight: '800',
-        color: '#0a7ea4',
+        color: '#8E8E93',
         textTransform: 'uppercase',
         letterSpacing: 1,
-        marginBottom: 15,
+        marginBottom: 12,
+        marginLeft: 4,
     },
     faqItem: {
         backgroundColor: 'white',
-        padding: 16,
-        borderRadius: 16,
+        padding: 18,
+        borderRadius: 20,
         marginBottom: 12,
-        borderLeftWidth: 4,
-        borderLeftColor: '#0a7ea4',
+        shadowColor: '#000',
+        shadowOpacity: 0.02,
+        shadowRadius: 10,
+        elevation: 2,
     },
     faqQuestion: {
         fontSize: 16,
         fontWeight: '700',
-        color: '#1A1A1A',
+        color: '#1C1C1E',
         marginBottom: 6,
     },
     faqAnswer: {
         fontSize: 14,
-        color: '#666',
+        color: '#636366',
         lineHeight: 20,
     },
     contactCard: {
@@ -171,58 +231,54 @@ const styles = StyleSheet.create({
         borderRadius: 24,
         padding: 24,
         shadowColor: '#000',
-        shadowOpacity: 0.1,
-        shadowRadius: 20,
+        shadowOpacity: 0.05,
+        shadowRadius: 15,
         elevation: 5,
-        alignItems: 'center',
     },
     contactTitle: {
-        fontSize: 20,
+        fontSize: 18,
         fontWeight: '800',
-        color: '#1A1A1A',
-        marginBottom: 10,
+        color: '#1C1C1E',
+        marginBottom: 8,
+        textAlign: 'center',
     },
     contactText: {
-        fontSize: 14,
-        color: '#666',
+        fontSize: 13,
+        color: '#8E8E93',
         textAlign: 'center',
-        lineHeight: 22,
-        marginBottom: 24,
+        lineHeight: 20,
+        marginBottom: 20,
     },
     emailBtn: {
-        backgroundColor: '#0a7ea4',
+        backgroundColor: '#007AFF',
         width: '100%',
-        padding: 20,
-        borderRadius: 20,
+        padding: 16,
+        borderRadius: 18,
         flexDirection: 'row',
         alignItems: 'center',
-        shadowColor: '#0a7ea4',
-        shadowOpacity: 0.3,
-        shadowRadius: 10,
-        elevation: 8,
     },
     emailBtnTextContainer: {
         flex: 1,
         marginLeft: 15,
     },
     emailBtnLabel: {
-        color: 'rgba(255,255,255,0.8)',
-        fontSize: 12,
-        fontWeight: '600',
+        color: 'rgba(255,255,255,0.7)',
+        fontSize: 10,
+        fontWeight: '700',
         textTransform: 'uppercase',
     },
     emailAddress: {
         color: 'white',
         fontSize: 15,
-        fontWeight: '800',
-        marginTop: 2,
+        fontWeight: '700',
+        marginTop: 1,
     },
     footer: {
         marginTop: 10,
         alignItems: 'center',
     },
     footerText: {
-        fontSize: 14,
-        color: '#BBB',
+        fontSize: 13,
+        color: '#C7C7CC',
     }
 });
