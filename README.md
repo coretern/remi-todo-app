@@ -1,50 +1,75 @@
-# Welcome to your Expo app 👋
+# 🍎 Remi Todo - Premium iOS Experience
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Remi Todo is not just another task list; it's a **High-Fidelity Productivity Sanctuary**. Designed with a minimalist heart and a premium soul, it brings the sleek, sophisticated aesthetic of modern iOS applications to your daily mission management.
 
-## Get started
+![Remi Todo Banner](https://img.shields.io/badge/Experience-Premium-007AFF?style=for-the-badge&logo=apple)
+![Platform-Android](https://img.shields.io/badge/Platform-Android-3DDC84?style=for-the-badge&logo=android)
+![Technology-Expo](https://img.shields.io/badge/Technology-Expo-000020?style=for-the-badge&logo=expo)
 
-1. Install dependencies
+---
 
+## ✨ Key Features
+
+- 💎 **Glassmorphism UI**: A floating, semi-transparent navigation system that feels alive.
+- 📳 **Haptic Feedback**: Physical "Taptic" sensations for every major interaction.
+- 🎉 **Confetti Celebration**: Professional victory animations when missions are accomplished.
+- 🔔 **Smart Alarms**: Native mission reminders to keep you on track.
+- 🎨 **Apple Design Language**: Sophisticated shadows, squircle logos, and official iOS-blue branding.
+
+---
+
+## 📂 Project Structure
+
+```text
+todo/
+├── app/                # Main application screens (Expo Router)
+│   ├── index.tsx       # Dashboard (Missions Control)
+│   ├── history.tsx     # Accomplished mission logs
+│   ├── about.tsx       # Branded about & developer credits
+│   └── _layout.tsx     # Global navigation & Sidebar logic
+├── components/         # Reusable UI components
+│   ├── todo/           # Mission-specific components (Input, Items)
+│   └── ui/             # Core UI elements (External)
+├── hooks/              # Custom React hooks (Logic & State)
+│   ├── useTodos.ts     # Core mission management logic
+│   └── useNotifications.ts # Reminder scheduling system
+├── assets/             # Images, fonts, and static resources
+├── constants/          # Global theme tokens and strings
+├── types/              # TypeScript definitions for the project
+├── scripts/            # Utility and maintenance scripts
+└── eas.json            # Build configuration (APK/AAB)
+```
+
+---
+
+## 🛠️ Get Started
+
+1. **Clone & Install**:
    ```bash
+   git clone https://github.com/monitorweb3/RemiTodo-app.git
+   cd todo
    npm install
    ```
 
-2. Start the app
-
+2. **Run Locally**:
    ```bash
    npx expo start
    ```
 
-In the output, you'll find options to open the app in a
+3. **Build APK (Testing)**:
+   ```bash
+   npx eas build --platform android --profile preview
+   ```
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+---
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+## 👨‍💻 Built with ❤️ by ANIL
 
-## Get a fresh project
+Crafted with a passion for high-end UI/UX and mobile engineering.
 
-When you're ready, run:
+[![GitHub](https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/anilmonitor)
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](https://linkedin.com/in/anilmonitor)
 
-```bash
-npm run reset-project
-```
+---
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
-
-## Learn more
-
-To learn more about developing your project with Expo, look at the following resources:
-
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+> *"Your productivity is a reflection of your environment. Remi Todo makes that environment beautiful."* — **ANIL**
