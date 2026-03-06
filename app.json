@@ -1,39 +1,65 @@
 {
   "expo": {
-    "name": "todo",
-    "slug": "todo",
+    "name": "Remi Todo",
+    "slug": "remi-todo",
     "version": "1.0.0",
+    "description": "Remi Todo is a premium task manager designed for elegance and productivity. Features smart alarms, local privacy, and a beautiful dashboard to help you conquer your missions every day.",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "todo",
+    "scheme": "remi-todo",
     "userInterfaceStyle": "automatic",
-    "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.remi.todoapp",
+      "infoPlist": {
+        "UIBackgroundModes": [
+          "remote-notification"
+        ]
+      }
     },
     "android": {
+      "package": "com.remi.todoapp",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
         "backgroundImage": "./assets/images/android-icon-background.png",
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
-      "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
+      "permissions": [
+        "NOTIFICATIONS",
+        "SCHEDULE_EXACT_ALARM",
+        "VIBRATE",
+        "RECEIVE_BOOT_COMPLETED"
+      ],
+      "intentFilters": [
+        {
+          "action": "android.intent.action.VIEW",
+          "data": {
+            "scheme": "remi-todo"
+          }
+        }
+      ]
     },
     "web": {
       "output": "static",
-      "favicon": "./assets/images/favicon.png"
+      "favicon": "./assets/images/favicon.png",
+      "description": "Remi Todo - Premium Minimalist Task Manager with Smart Alarms"
     },
     "plugins": [
       "expo-router",
+      [
+        "expo-notifications",
+        {
+          "color": "#0a7ea4"
+        }
+      ],
       [
         "expo-splash-screen",
         {
           "image": "./assets/images/splash-icon.png",
           "imageWidth": 200,
           "resizeMode": "contain",
-          "backgroundColor": "#ffffff",
+          "backgroundColor": "#F8F9FA",
           "dark": {
             "backgroundColor": "#000000"
           }
@@ -43,6 +69,12 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "426e26f3-b68d-4cfc-9fdf-c62b1274c032"
+      }
     }
   }
 }
