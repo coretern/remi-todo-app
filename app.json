@@ -2,11 +2,16 @@
   "expo": {
     "name": "Remi Todo",
     "slug": "remi-todo",
-    "version": "1.0.0",
-    "description": "Remi Todo is a premium task manager designed for elegance and productivity. Features smart alarms, local privacy, and a beautiful dashboard to help you conquer your missions every day.",
+    "version": "1.0.2",
+    "description": "Remi Todo is a premium task manager designed for elegance and productivity. Features local privacy and a beautiful dashboard to help you conquer your missions every day.",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
-    "scheme": "remi-todo",
+    "icon": "./assets/images/remiicon.png",
+    "splash": {
+      "image": "./assets/images/remiicon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#F8F9FA"
+    },
+    "scheme": "com.remi.todoapp",
     "userInterfaceStyle": "automatic",
     "ios": {
       "supportsTablet": true,
@@ -17,19 +22,18 @@
         ]
       }
     },
-    "jsEngine": "hermes",
     "android": {
       "package": "com.remi.todoapp",
-      "jsEngine": "hermes",
+      "versionCode": 3,
+      "softwareKeyboardLayoutMode": "resize",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
-        "foregroundImage": "./assets/images/android-icon-foreground.png",
+        "foregroundImage": "./assets/images/remiicon.png",
         "backgroundImage": "./assets/images/android-icon-background.png",
-        "monochromeImage": "./assets/images/android-icon-monochrome.png"
+        "monochromeImage": "./assets/images/remiicon.png"
       },
       "permissions": [
         "NOTIFICATIONS",
-        "SCHEDULE_EXACT_ALARM",
         "RECEIVE_BOOT_COMPLETED"
       ],
       "intentFilters": [
@@ -43,8 +47,8 @@
     },
     "web": {
       "output": "static",
-      "favicon": "./assets/images/favicon.png",
-      "description": "Remi Todo - Premium Minimalist Task Manager with Smart Alarms"
+      "favicon": "./assets/images/remiicon.png",
+      "description": "Remi Todo - Premium Minimalist Task Manager"
     },
     "plugins": [
       "expo-router",
@@ -57,7 +61,7 @@
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/splash-icon.png",
+          "image": "./assets/images/remiicon.png",
           "imageWidth": 200,
           "resizeMode": "contain",
           "backgroundColor": "#F8F9FA",
@@ -65,7 +69,8 @@
             "backgroundColor": "#000000"
           }
         }
-      ]
+      ],
+      "expo-web-browser"
     ],
     "experiments": {
       "typedRoutes": true,

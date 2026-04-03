@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Privacy Policy | Remi Todo</title>
+    <meta name="description"
+        content="Official Privacy Policy for Remi Todo app. Learn how we handle your data with our privacy-first local storage and optional cloud sync features.">
+    <meta name="robots" content="index, follow">
+    <!-- Google Fonts: Outfit -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-hover: #4f46e5;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg);
+            color: var(--text-main);
+            line-height: 1.6;
+            padding: 2rem 1rem;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 3rem;
+            animation: fadeInDown 0.8s ease-out;
+        }
+
+        .logo-placeholder {
+            width: 70px;
+            height: 70px;
+            background: linear-gradient(135deg, var(--primary), #818cf8);
+            border-radius: 18px;
+            margin: 0 auto 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: var(--shadow-lg);
+            color: white;
+            font-weight: 700;
+            font-size: 1.5rem;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 0.5rem;
+        }
+
+        .last-updated {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            font-weight: 400;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 24px;
+            padding: 2.5rem;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+            margin-bottom: 2rem;
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        section {
+            margin-bottom: 2.5rem;
+        }
+
+        section:last-child {
+            margin-bottom: 0;
+        }
+
+        h2 {
+            font-size: 1.5rem;
+            color: var(--text-main);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-weight: 600;
+        }
+
+        h2 span {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            background: #f1f5f9;
+            border-radius: 8px;
+            font-size: 1.1rem;
+        }
+
+        p {
+            color: var(--text-muted);
+            margin-bottom: 1rem;
+            font-weight: 400;
+        }
+
+        .highlight-box {
+            background-color: #eff6ff;
+            border-left: 4px solid var(--primary);
+            padding: 1.1rem;
+            border-radius: 0 12px 12px 0;
+            margin-bottom: 1.5rem;
+        }
+
+        .highlight-box p {
+            margin-bottom: 0;
+            color: #1e3a8a;
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+
+        ul {
+            list-style: none;
+            margin-bottom: 1.5rem;
+        }
+
+        li {
+            position: relative;
+            padding-left: 1.5rem;
+            margin-bottom: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        li::before {
+            content: "•";
+            color: var(--primary);
+            font-weight: bold;
+            position: absolute;
+            left: 0;
+            font-size: 1.2rem;
+        }
+
+        .contact-info {
+            background: #f8fafc;
+            border: 1px dashed var(--border);
+            padding: 1.5rem;
+            border-radius: 16px;
+            margin-top: 1rem;
+        }
+
+        .contact-info a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.2s;
+        }
+
+        .contact-info a:hover {
+            color: var(--primary-hover);
+            text-decoration: underline;
+        }
+
+        footer {
+            text-align: center;
+            padding: 2rem 0;
+            color: var(--text-muted);
+            font-size: 0.875rem;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 640px) {
+            body {
+                padding: 1rem 0.5rem;
+            }
+
+            .card {
+                padding: 1.5rem;
+                border-radius: 16px;
+            }
+
+            h1 {
+                font-size: 1.75rem;
+            }
+
+            h2 {
+                font-size: 1.25rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container" id="privacy-content">
+        <header>
+            <div class="logo-placeholder">RT</div>
+            <h1>Privacy Policy</h1>
+            <p class="last-updated">Last Updated: April 03, 2026</p>
+        </header>
+
+        <main class="card">
+            <section id="intro">
+                <p>Welcome to <strong>Remi Todo</strong>. Your privacy is critically important to us. This Privacy
+                    Policy describes how we collect, use, and handle your data across our mobile application.</p>
+                <div class="highlight-box">
+                    <p><strong>Hybrid Data Model:</strong> Remi Todo defaults to local-only storage, but offers an optional Cloud Sync feature for users who wish to preserve their data across devices.</p>
+                </div>
+            </section>
+
+            <section id="collection">
+                <h2><span>📂</span> 1. Information Collection and Use</h2>
+                <p>We process two types of data depending on your chosen settings:</p>
+                <ul>
+                    <li><strong>Local Data (Default):</strong> Tasks, History, and Missions are stored on your device using encrypted <code>AsyncStorage</code>. This data never leaves your device unless you enable Sync.</li>
+                    <li><strong>Cloud Data (Optional):</strong> If you enable "Cloud Sync", we collect your <strong>Email Address</strong> and your <strong>Task List</strong> to store them securely in <code>Google Firebase Firestore</code>. This allows you to restore your data if you switch devices.</li>
+                    <li><strong>Calendar Data (Optional):</strong> If you enable Google Calendar integration, the app will sync your tasks to your primary Google Calendar.</li>
+                </ul>
+            </section>
+
+            <section id="permissions">
+                <h2><span>🔔</span> 2. Notifications & Permissions</h2>
+                <p>The app requests specific permissions to function correctly:</p>
+                <ul>
+                    <li><strong>Notifications:</strong> Used for mission reminders and task updates. This is triggered locally on your device.</li>
+                    <li><strong>Haptic Feedback:</strong> Uses the device vibration motor for interaction confirmation and physical feedback.</li>
+                </ul>
+            </section>
+
+            <section id="what-we-dont-do">
+                <h2><span>❌</span> 3. What We Do NOT Collect or Use</h2>
+                <p>For absolute clarity and your peace of mind, Remi Todo does NOT do the following:</p>
+                <ul>
+                    <li><strong>No Background Audio:</strong> The app does not record or play audio in the background.</li>
+                    <li><strong>No Real-time Location:</strong> We do not track or store your GPS coordinates or live location.</li>
+                    <li><strong>No Alarm Scheduling:</strong> As per our latest update, the app does not feature "Smart Alarms" or schedule exact system-level alarms.</li>
+                    <li><strong>No Third-Party Advertising:</strong> We do not include third-party ads that track your behavior.</li>
+                </ul>
+            </section>
+
+            <section id="security">
+                <h2><span>🛡️</span> 3. Data Security and Retention</h2>
+                <p>We use industry-standard security measures:</p>
+                <p>Cloud data is hosted on Google Firebase with restricted access permissions. We retain your cloud data only as long as your account remains active. You can request data deletion at any time by contacting us.</p>
+                <p><em>Note:</em> Local-only data is deleted permanently when you uninstall the app.</p>
+            </section>
+
+            <section id="third-party">
+                <h2><span>🌐</span> 4. Third-Party Services</h2>
+                <p>We utilize the following service providers:</p>
+                <ul>
+                    <li><strong>Google Firebase:</strong> Used for Firestore database storage and optional app analytics.</li>
+                    <li><strong>Google Calendar API:</strong> Used exclusively for syncing your tasks to your calendar upon request.</li>
+                    <li><strong>External Links:</strong> The 'About' section may link to GitHub or LinkedIn; we do not control their privacy practices.</li>
+                </ul>
+            </section>
+
+            <section id="children">
+                <h2><span>👶</span> 5. Children’s Privacy</h2>
+                <p>Our application is not intended for users under the age of 13. We do not knowingly collect personal information from children.</p>
+            </section>
+
+            <section id="contact">
+                <h2><span>📬</span> 6. Contact Us</h2>
+                <p>If you have any questions or suggestions, please reach out to us:</p>
+                <div class="contact-info">
+                    <p><strong>Developer:</strong> ANIL</p>
+                    <p><strong>Email:</strong> <a href="mailto:anilarangi6@gmail.com">anilarangi6@gmail.com</a></p>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <p>&copy; 2026 Remi Todo. All rights reserved.</p>
+        </footer>
+    </div>
+
+</body>
+
+</html>

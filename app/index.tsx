@@ -1,36 +1,38 @@
+// Remi Todo App - Version 1.0.1 (Stable Build)
 import { Ionicons } from '@expo/vector-icons';
-import { DrawerActions } from '@react-navigation/native';
-import { LinearGradient } from 'expo-linear-gradient';
-import { useNavigation } from 'expo-router';
+import { useNavigation, useRouter } from 'expo-router';
 import React, { useRef, useState } from 'react';
 import {
     ActivityIndicator,
-    Animated,
-    Dimensions,
+    FlatList,
+    Image,
+    Keyboard,
     KeyboardAvoidingView,
     LayoutAnimation,
+    Modal,
     Platform,
-    SafeAreaView,
     Share,
     StatusBar,
     StyleSheet,
     Text,
+    TextInput,
     TouchableOpacity,
     UIManager,
-    View,
+    View
 } from 'react-native';
-import AddTodoInput from '../components/todo/AddTodoInput';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import TodoItem from '../components/todo/TodoItem/TodoItem';
+import { useTheme } from '../context/ThemeContext';
 import { useTodos } from '../hooks/useTodos';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
     UIManager.setLayoutAnimationEnabledExperimental(true);
 }
 
-const { width } = Dimensions.get('window');
-
 export default function HomeScreen() {
+    const insets = useSafeAreaInsets();
     const navigation = useNavigation();
+    const router = useRouter();
     const {
         todos,
         addTodo,
@@ -41,16 +43,21 @@ export default function HomeScreen() {
         count,
         completedCount
     } = useTodos();
+    const { theme, toggleTheme, colors } = useTheme();
 
+    const [showPagesModal, setShowPagesModal] = useState(false);
+    const [isSearching, setIsSearching] = useState(false);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
 
-    const handleOpenDrawer = () => {
-        navigation.dispatch(DrawerActions.openDrawer());
-    };
-
-    const handleAdd = (text: string, due?: number) => {
-        LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-        addTodo(text, due);
-    };
+    React.useEffect(() => {
+        const showSub = Keyboard.addListener(Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow', () => setIsKeyboardVisible(true));
+        const hideSub = Keyboard.addListener(Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide', () => setIsKeyboardVisible(false));
+        return () => {
+            showSub.remove();
+            hideSub.remove();
+        };
+    }, []);
 
     const toggleTodo = (id: string) => {
         LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
@@ -78,111 +85,115 @@ export default function HomeScreen() {
     };
 
     const [filter, setFilter] = useState<'Active' | 'Completed'>('Active');
-    const scrollY = useRef(new Animated.Value(0)).current;
 
     const filteredTodos = todos.filter(t => {
+        if (isSearching && searchQuery) {
+            return t.task.toLowerCase().includes(searchQuery.toLowerCase());
+        }
         if (filter === 'Active') return !t.completed;
         return t.completed;
     });
 
-    // Dashboard Header Animation (GPU-Driven)
-    const headerTranslateY = scrollY.interpolate({
-        inputRange: [0, 100],
-        outputRange: [0, -110],
-        extrapolate: 'clamp'
-    });
-
-    const headerContentScale = scrollY.interpolate({
-        inputRange: [0, 100],
-        outputRange: [1, 0.85],
-        extrapolate: 'clamp'
-    });
-
-    const headerTitleOpacity = scrollY.interpolate({
-        inputRange: [0, 80],
-        outputRange: [1, 0],
-        extrapolate: 'clamp'
-    });
-
     if (isLoading) {
         return (
-            <View style={styles.loadingContainer}>
-                <ActivityIndicator size="large" color="#007AFF" />
+            <View style={[styles.loadingContainer, { backgroundColor: colors.background }]}>
+                <Image 
+                    source={require('../assets/images/remiicon.png')} 
+                    style={styles.loadingLogo}
+                    resizeMode="contain"
+                />
+                <Text style={[styles.loadingAppName, { color: colors.header }]}>Remi Todo</Text>
+                <ActivityIndicator size="small" color={colors.header} style={{ marginTop: 25 }} />
+                <Text style={{ marginTop: 15, color: colors.secondaryText, fontSize: 12, fontWeight: '600', letterSpacing: 1.5 }}>LOADING MISSION...</Text>
             </View>
         );
     }
 
-    const completionPercentage = count > 0 ? (completedCount / count) * 100 : 0;
+    const navigationPages = [
+        { title: 'Mission History', icon: 'time-outline', path: '/history' },
+        { title: 'Settings', icon: 'settings-outline', path: '/settings' },
+        { title: 'Share App', icon: 'share-social-outline', path: 'share_app' },
+        { title: 'Legal Info', icon: 'shield-outline', path: '/legal' },
+        { title: 'About Remi', icon: 'information-circle-outline', path: '/about' },
+    ];
 
     return (
-        <View style={styles.container}>
-            <StatusBar barStyle="light-content" />
-
-            {/* Premium iPhone-Style Header */}
-            <Animated.View style={[
-                styles.dashboardHeader,
-                { transform: [{ translateY: headerTranslateY }] }
-            ]}>
-                <LinearGradient
-                    colors={['#007AFF', '#0055D4']}
-                    style={StyleSheet.absoluteFill}
-                />
-
-                <SafeAreaView style={{ flex: 1 }}>
-                    <View style={styles.headerTopBar}>
-                        <TouchableOpacity onPress={handleOpenDrawer} style={styles.menuBtn}>
-                            <Ionicons name="menu" size={26} color="white" />
+        <View style={[styles.container, { backgroundColor: colors.background }]}>
+            <View style={[styles.navBar, { backgroundColor: colors.header }]}>
+                {isSearching ? (
+                    <View style={[styles.searchContainer, { flex: 1 }]}>
+                        <TouchableOpacity onPress={() => { setIsSearching(false); setSearchQuery(''); }}>
+                            <Ionicons name="arrow-back" size={24} color="white" />
                         </TouchableOpacity>
-
-                        <View style={styles.headerActions}>
-                            <TouchableOpacity style={styles.iconBtn} onPress={handleShare}>
-                                <Ionicons name="share-social-outline" size={20} color="white" />
-                            </TouchableOpacity>
-                            <TouchableOpacity style={[styles.iconBtn, { backgroundColor: 'rgba(255,255,255,0.2)' }]} onPress={clearCompleted}>
-                                <Ionicons name="sparkles-outline" size={20} color="white" />
-                            </TouchableOpacity>
-                        </View>
+                        <TextInput
+                            style={styles.searchInput}
+                            placeholder="Search missions..."
+                            placeholderTextColor="rgba(255,255,255,0.6)"
+                            value={searchQuery}
+                            onChangeText={setSearchQuery}
+                            autoFocus
+                        />
                     </View>
-
-                    <Animated.View style={{
-                        opacity: headerTitleOpacity,
-                        transform: [{ scale: headerContentScale }],
-                        paddingHorizontal: 25
-                    }}>
-                        <Text style={styles.dateLabel}>{new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}</Text>
-                        <View style={styles.titleRow}>
-                            <Text style={styles.appName}>Missions</Text>
-                            <View style={styles.badge}>
-                                <Text style={styles.badgeText}>{completedCount}/{count}</Text>
-                            </View>
+                ) : (
+                    <>
+                        <View style={styles.navLeft}>
+                            <Image 
+                                source={require('../assets/images/icon.png')} 
+                                style={styles.navLogo}
+                                resizeMode="contain"
+                            />
+                            <Text style={styles.navTitle}>Remi Todo</Text>
                         </View>
-
-                        {/* Sleek Integrated Progress */}
-                        <View style={styles.progressSection}>
-                            <View style={styles.progressInfo}>
-                                <Text style={styles.progressLabel}>Daily Progress</Text>
-                                <Text style={styles.progressPercent}>{Math.round(completionPercentage)}%</Text>
-                            </View>
-                            <View style={styles.miniProgressContainer}>
-                                <View style={[styles.miniProgressBar, { width: `${completionPercentage}%` }]} />
-                            </View>
+                        <View style={styles.navRight}>
+                            <TouchableOpacity style={styles.navIcon} onPress={() => setIsSearching(true)}>
+                                <Ionicons name="search-outline" size={22} color="white" />
+                            </TouchableOpacity>
+                            <TouchableOpacity style={styles.navIcon} onPress={() => setShowPagesModal(true)}>
+                                <Ionicons name="ellipsis-vertical" size={22} color="white" />
+                            </TouchableOpacity>
                         </View>
-                    </Animated.View>
-                </SafeAreaView>
-            </Animated.View>
+                    </>
+                )}
+            </View>
 
-            <KeyboardAvoidingView
-                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-                style={{ flex: 1 }}
+            <Modal
+                visible={showPagesModal}
+                transparent={true}
+                animationType="fade"
+                onRequestClose={() => setShowPagesModal(false)}
             >
-                {/* List Section */}
-                <Animated.FlatList
+                <TouchableOpacity 
+                    style={styles.dropdownOverlay} 
+                    activeOpacity={1} 
+                    onPress={() => setShowPagesModal(false)}
+                >
+                    <View style={[styles.dropdownMenu, { backgroundColor: colors.surface }]}>
+                        {navigationPages.map((page, index) => (
+                            <TouchableOpacity 
+                                key={index}
+                                style={[styles.dropdownItem, { borderBottomColor: colors.border }]}
+                                onPress={() => {
+                                    setShowPagesModal(false);
+                                    if (page.path === 'share_app') {
+                                        handleShare();
+                                    } else if (page.path !== '/') {
+                                        // @ts-ignore
+                                        navigation.navigate(page.path.replace('/', ''));
+                                    }
+                                }}
+                            >
+                                <Text style={[styles.dropdownItemText, { color: colors.text }]}>{page.title}</Text>
+                            </TouchableOpacity>
+                        ))}
+                    </View>
+                </TouchableOpacity>
+            </Modal>
+
+            <View style={{ flex: 1 }}>
+                <FlatList
+                    style={{ flex: 1 }}
                     data={filteredTodos}
                     keyExtractor={(item) => item.id}
-                    onScroll={Animated.event(
-                        [{ nativeEvent: { contentOffset: { y: scrollY } } }],
-                        { useNativeDriver: true }
-                    )}
                     renderItem={({ item }) => (
                         <TodoItem
                             todo={item}
@@ -190,64 +201,33 @@ export default function HomeScreen() {
                             onDelete={deleteTodo}
                         />
                     )}
-                    contentContainerStyle={styles.listContainer}
+                    contentContainerStyle={[
+                        styles.listContainer, 
+                        { paddingBottom: 100 + insets.bottom } 
+                    ]}
                     showsVerticalScrollIndicator={false}
-                    scrollEventThrottle={16}
-                    ListHeaderComponent={
-                        <View>
-                            <View style={styles.headerSpacer} />
-                            {/* iOS Segmented Control Style Filter */}
-                            <View style={styles.segmentedContainer}>
-                                <View style={styles.segmentedControl}>
-                                    {(['Active', 'Completed'] as const).map(f => (
-                                        <TouchableOpacity
-                                            key={f}
-                                            onPress={() => {
-                                                LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-                                                setFilter(f);
-                                            }}
-                                            style={[styles.segmentTab, filter === f && styles.activeSegmentTab]}
-                                        >
-                                            <Text style={[styles.segmentText, filter === f && styles.activeSegmentText]}>{f}</Text>
-                                        </TouchableOpacity>
-                                    ))}
-                                </View>
-                            </View>
-                        </View>
-                    }
-                    windowSize={5}
-                    initialNumToRender={10}
-                    removeClippedSubviews={Platform.OS === 'android'}
                     ListEmptyComponent={
                         <View style={styles.emptyContainer}>
-                            <Ionicons name="document-text-outline" size={60} color="#DDD" />
-                            <Text style={styles.emptyText}>No {filter.toLowerCase()} missions found.</Text>
+                            <Ionicons name="checkmark-done" size={60} color={theme === 'dark' ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.05)"} />
+                            <Text style={[styles.emptyText, { color: colors.secondaryText }]}>All Missions Completed.</Text>
                         </View>
                     }
                 />
 
-                {/* Premium Floating Action Dock */}
-                <View style={styles.footerDock}>
-                    <LinearGradient
-                        colors={['transparent', 'rgba(242, 242, 247, 0.8)', '#F2F2F7']}
-                        style={StyleSheet.absoluteFill}
-                        pointerEvents="none"
-                    />
-                    <View style={styles.dockHandle} />
-                    <View style={styles.inputShadow}>
-                        <AddTodoInput onAdd={handleAdd} />
-                    </View>
-                </View>
-
-                {/* Bottom Fade Mask (Ensures list transparency is clean) */}
-                <LinearGradient
-                    colors={['transparent', 'rgba(242, 242, 247, 0.95)', '#F2F2F7']}
-                    style={styles.bottomMask}
-                    pointerEvents="none"
-                />
-
-                {/* Celebration Overlay Removal */}
-            </KeyboardAvoidingView>
+                <TouchableOpacity 
+                    style={[
+                        styles.fab, 
+                        { 
+                            backgroundColor: 'white',
+                            bottom: 30 + insets.bottom
+                        }
+                    ]} 
+                    activeOpacity={0.8}
+                    onPress={() => router.push('/new-task')}
+                >
+                    <Ionicons name="add" size={36} color="#006EAF" />
+                </TouchableOpacity>
+            </View>
         </View>
     );
 }
@@ -255,196 +235,136 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#F2F2F7', // iOS Light Gray Background
     },
     loadingContainer: {
-        flex: 1,
+        height: '100%',
+        width: '100%',
         justifyContent: 'center',
         alignItems: 'center',
     },
-    dashboardHeader: {
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-        height: 195,
-        borderBottomLeftRadius: 32,
-        borderBottomRightRadius: 32,
-        overflow: 'hidden',
-        // iOS Sophisticated Shadow
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 10 },
-        shadowOpacity: 0.15,
-        shadowRadius: 20,
-        elevation: 15,
-        zIndex: 1000,
-    },
-    headerTopBar: {
+    navBar: {
+        height: Platform.OS === 'ios' ? 115 : 100,
+        backgroundColor: '#006EAF',
         flexDirection: 'row',
+        alignItems: 'center',
         justifyContent: 'space-between',
-        alignItems: 'center',
-        paddingTop: Platform.OS === 'ios' ? 10 : 40,
-        paddingHorizontal: 20,
-        marginBottom: 5,
+        paddingHorizontal: 15,
+        paddingTop: Platform.OS === 'ios' ? 55 : 40,
     },
-    menuBtn: {
-        width: 40,
-        height: 40,
+    navLogo: {
+        width: 32,
+        height: 32,
+        marginRight: 10,
+        borderRadius: 8,
+    },
+    loadingLogo: {
+        width: 100,
+        height: 100,
+        marginBottom: 15,
         borderRadius: 20,
-        backgroundColor: 'rgba(255, 255, 255, 0.15)',
-        alignItems: 'center',
-        justifyContent: 'center',
     },
-    headerSpacer: {
-        height: 195,
-    },
-    dateLabel: {
-        fontSize: 11,
-        fontWeight: '700',
-        color: 'rgba(255,255,255,0.6)',
-        textTransform: 'uppercase',
-        letterSpacing: 2,
-        marginBottom: 4,
-    },
-    titleRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-    },
-    appName: {
-        fontSize: 32,
-        fontWeight: '800',
-        color: 'white',
+    loadingAppName: {
+        fontSize: 28,
+        fontWeight: '900',
         letterSpacing: -0.5,
     },
-    badge: {
-        backgroundColor: 'rgba(255,255,255,0.2)',
-        paddingHorizontal: 8,
-        paddingVertical: 2,
-        borderRadius: 8,
-        marginLeft: 12,
-    },
-    badgeText: {
-        color: 'white',
-        fontSize: 14,
-        fontWeight: '700',
-    },
-    progressSection: {
-        marginTop: 20,
-    },
-    progressInfo: {
+    searchContainer: {
         flexDirection: 'row',
-        justifyContent: 'space-between',
         alignItems: 'center',
-        marginBottom: 8,
-    },
-    progressLabel: {
-        fontSize: 12,
-        color: 'rgba(255,255,255,0.8)',
-        fontWeight: '600',
-    },
-    progressPercent: {
-        fontSize: 12,
-        color: 'white',
-        fontWeight: '800',
-    },
-    miniProgressContainer: {
-        height: 6,
-        backgroundColor: 'rgba(255, 255, 255, 0.2)',
-        borderRadius: 3,
-        overflow: 'hidden',
-    },
-    miniProgressBar: {
         height: '100%',
-        backgroundColor: '#34C759', // Success Green
     },
-    headerActions: {
-        flexDirection: 'row',
-    },
-    iconBtn: {
-        width: 40,
-        height: 40,
-        borderRadius: 20,
-        backgroundColor: 'rgba(255, 255, 255, 0.15)',
-        alignItems: 'center',
-        justifyContent: 'center',
-        marginLeft: 10,
-    },
-    segmentedContainer: {
-        paddingHorizontal: 20,
-        marginTop: 20,
-        marginBottom: 10,
-    },
-    segmentedControl: {
-        flexDirection: 'row',
-        backgroundColor: '#E3E3E8',
-        borderRadius: 12,
-        padding: 2,
-    },
-    segmentTab: {
+    searchInput: {
         flex: 1,
-        paddingVertical: 8,
+        color: 'white',
+        fontSize: 18,
+        marginLeft: 15,
+        fontWeight: '500',
+    },
+    navLeft: {
+        flexDirection: 'row',
         alignItems: 'center',
-        justifyContent: 'center',
-        borderRadius: 10,
     },
-    activeSegmentTab: {
-        backgroundColor: 'white',
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.12,
-        shadowRadius: 4,
-        elevation: 2,
-    },
-    segmentText: {
-        fontSize: 13,
-        fontWeight: '600',
-        color: '#636366',
-    },
-    activeSegmentText: {
-        color: '#000',
+    navTitle: {
+        color: 'white',
+        fontSize: 20,
         fontWeight: '700',
+    },
+    navRight: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    navIcon: {
+        marginLeft: 15,
+        padding: 5,
     },
     listContainer: {
         paddingHorizontal: 16,
-        paddingBottom: 160, // Perfect clearance for the new dock
+        paddingTop: 20,
+        paddingBottom: 20,
     },
-    footerDock: {
+    fab: {
         position: 'absolute',
-        bottom: 0,
-        left: 0,
-        right: 0,
-        paddingBottom: Platform.OS === 'ios' ? 40 : 25,
-        paddingHorizontal: 20,
-        zIndex: 2000,
+        bottom: 110,
+        right: 20,
+        width: 65,
+        height: 65,
+        borderRadius: 33,
+        justifyContent: 'center',
         alignItems: 'center',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.2,
+        shadowRadius: 8,
+        elevation: 8,
+        zIndex: 1000,
     },
-    dockHandle: {
-        width: 36,
-        height: 5,
-        backgroundColor: 'rgba(0, 0, 0, 0.1)',
-        borderRadius: 2.5,
-        marginBottom: 8,
-    },
-    inputShadow: {
-        width: '100%',
-        maxWidth: 500, // Better for tablets/web
-    },
-    bottomMask: {
+    quickTaskBar: {
+        backgroundColor: '#006EAF',
+        minHeight: 75,
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingHorizontal: 15,
+        paddingTop: 10,
         position: 'absolute',
         bottom: 0,
         left: 0,
         right: 0,
-        height: 140,
         zIndex: 1000,
+        elevation: 10, // Shadow for Android visibility
     },
     emptyContainer: {
         alignItems: 'center',
-        paddingVertical: 100,
+        paddingVertical: 140,
     },
     emptyText: {
         fontSize: 16,
-        color: '#BBB',
-        fontWeight: '500',
-        marginTop: 12,
+        fontWeight: '700',
+        marginTop: 20,
+    },
+    dropdownOverlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0, 0, 0, 0.4)', 
+    },
+    dropdownMenu: {
+        position: 'absolute',
+        top: Platform.OS === 'ios' ? 110 : 95,
+        right: 10,
+        width: 250,
+        borderRadius: 12,
+        paddingVertical: 5,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 10 },
+        shadowOpacity: 0.3,
+        shadowRadius: 10,
+        elevation: 15,
+    },
+    dropdownItem: {
+        paddingVertical: 18,
+        paddingHorizontal: 15,
+        borderBottomWidth: 1,
+    },
+    dropdownItemText: {
+        fontSize: 16,
+        fontWeight: '600',
     },
 });

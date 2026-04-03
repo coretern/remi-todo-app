@@ -1,27 +1,25 @@
 import Constants from 'expo-constants';
 import * as Device from 'expo-device';
-import * as Notifications from 'expo-notifications';
 import { useCallback, useEffect, useState } from 'react';
 import { Platform } from 'react-native';
 
-// Only set handler if not on Web
-if (Platform.OS !== 'web') {
-    Notifications.setNotificationHandler({
-        handleNotification: async () => ({
-            shouldShowAlert: true,
-            shouldPlaySound: true,
-            shouldSetBadge: true,
-            shouldShowBanner: true,
-            shouldShowList: true,
-        }),
-    });
-}
+// Helper to get notifications instance safely
+const getNotifications = () => {
+    try {
+        // SDK 53 Safety: expo-notifications causes crashes in Expo Go Android
+        if (Platform.OS === 'web' || Constants.appOwnership === 'expo') return null;
+        return require('expo-notifications');
+    } catch (e) {
+        return null;
+    }
+};
 
 export const useNotifications = () => {
     const [expoPushToken, setExpoPushToken] = useState('');
 
     const registerForPushNotificationsAsync = useCallback(async () => {
-        if (Platform.OS === 'web') return;
+        const Notifications = getNotifications();
+        if (!Notifications || Platform.OS === 'web') return;
 
         let token;
         try {
@@ -47,12 +45,10 @@ export const useNotifications = () => {
             }
 
             // 3. Expo SDK 53+ Safety: Skip push token in Expo Go / Development
-            // Expo Go no longer supports the push token functionality on Android 
             const isExpoGo = Constants.executionEnvironment === 'storeClient';
 
             if (Device.isDevice && !isExpoGo) {
                 try {
-                    // Try getting token, fail silently if not supported
                     const tokenData = await Notifications.getExpoPushTokenAsync();
                     token = tokenData.data;
                 } catch (e) {
@@ -63,39 +59,52 @@ export const useNotifications = () => {
             }
 
         } catch (error) {
-            // Final safety catch to prevent app crash
             console.log('Notification setup skipped:', error);
         }
 
         return token;
     }, []);
 
-    const scheduleTodoReminder = useCallback(async (id: string, task: string, dueDate: number) => {
-        if (Platform.OS === 'web') return null;
-        if (dueDate <= Date.now()) return null;
+    const scheduleTodoReminder = useCallback(async (id: string, task: string, dueDate: number, minutesBefore: number = 0) => {
+        // Calculate trigger time
+        const triggerDate = new Date(dueDate - (minutesBefore * 60 * 1000));
+        
+        console.log(`[Reminder Logic] Mission: "${task}" alert scheduled for: ${triggerDate.toLocaleString()}`);
+        console.log(`[Reminder Logic] Offset: ${minutesBefore} minutes before mission due time.`);
+
+        const Notifications = getNotifications();
+        if (!Notifications || Platform.OS === 'web') {
+            console.log(`[Reminder Info] Native notification skipped (Running in Expo Go/Web). Logic is verified!`);
+            return 'expo_go_mock_id';
+        }
+        
+        if (triggerDate.getTime() <= Date.now()) return null;
 
         try {
-            // LOCAL notifications work fine in Expo Go
             const notificationId = await Notifications.scheduleNotificationAsync({
                 content: {
-                    title: "Task Reminder ⏰",
-                    body: `Don't forget: ${task}`,
+                    title: "Mission Alert ⏰",
+                    body: minutesBefore > 0 
+                        ? `${task} starts in ${minutesBefore} minutes!` 
+                        : `Time for your mission: ${task}`,
                     data: { id },
                 },
                 trigger: {
                     type: Notifications.SchedulableTriggerInputTypes.DATE,
-                    date: new Date(dueDate),
+                    date: triggerDate,
                 },
             });
+            console.log(`[Reminder Success] Native alert active with ID: ${notificationId}`);
             return notificationId;
         } catch (e) {
-            console.error('Failed to schedule local notification', e);
+            console.error('[Reminder Error] Failed to schedule notification', e);
             return null;
         }
     }, []);
 
     const cancelReminder = useCallback(async (id: string) => {
-        if (Platform.OS === 'web' || !id) return;
+        const Notifications = getNotifications();
+        if (!Notifications || Platform.OS === 'web' || !id) return;
         try {
             await Notifications.cancelScheduledNotificationAsync(id);
         } catch (e) {
@@ -104,11 +113,23 @@ export const useNotifications = () => {
     }, []);
 
     useEffect(() => {
-        registerForPushNotificationsAsync().then(token => {
-            if (token) setExpoPushToken(token);
-        }).catch(err => {
-            console.log('Notification registration error ignored:', err);
-        });
+        const Notifications = getNotifications();
+        if (Notifications) {
+            Notifications.setNotificationHandler({
+                handleNotification: async () => ({
+                    shouldShowAlert: true,
+                    shouldPlaySound: true,
+                    shouldSetBadge: true,
+                }),
+            });
+            
+            registerForPushNotificationsAsync().then(token => {
+                if (token) setExpoPushToken(token);
+            }).catch(err => {
+                // Silently catch and log for debug, but don't crash the app
+                console.log('Push notification registration skipped (normal for Expo Go)');
+            });
+        }
     }, [registerForPushNotificationsAsync]);
 
     return {

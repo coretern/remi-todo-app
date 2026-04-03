@@ -6,6 +6,7 @@ export interface Todo {
     completedAt?: number; // Exact time when mission was finished
     dueDate?: number;
     reminderId?: string;
+    reminderOffset?: number; // Minutes before due date
 }
 
 export type TodoAction =

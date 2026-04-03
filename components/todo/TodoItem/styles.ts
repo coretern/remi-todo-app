@@ -2,82 +2,80 @@ import { StyleSheet } from 'react-native';
 
 export const styles = StyleSheet.create({
     container: {
-        backgroundColor: 'white',
-        borderRadius: 24,
-        marginVertical: 10,
+        backgroundColor: '#003366', // Saturated Med Navy
+        borderRadius: 16,
+        marginVertical: 6,
         marginHorizontal: 16,
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
-        // Premium Apple Shadow
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 8 },
-        shadowOpacity: 0.1,
-        shadowRadius: 16,
-        elevation: 8,
+        borderWidth: 1,
+        borderColor: 'rgba(255, 255, 255, 0.1)',
+        elevation: 0,
+        overflow: 'hidden',
     },
     content: {
         flex: 1,
         flexDirection: 'row',
         alignItems: 'center',
-        paddingVertical: 20,
+        paddingVertical: 12,
         paddingLeft: 16,
     },
     textContainer: {
         flex: 1,
-        marginLeft: 18,
+        marginLeft: 15,
+        marginRight: 10,
     },
     text: {
-        fontSize: 17, // iOS Standard body size
-        color: '#1C1C1E',
-        fontWeight: '700',
-        letterSpacing: -0.5,
+        fontSize: 16,
+        color: 'white',
+        fontWeight: '600',
+        letterSpacing: -0.2,
+    },
+    taskScroll: {
+        flex: 1,
     },
     completedText: {
         textDecorationLine: 'line-through',
-        color: '#C7C7CC',
+        color: 'rgba(255, 255, 255, 0.3)',
+        fontWeight: '500',
+    },
+    timestamp: {
+        fontSize: 8,
+        color: 'rgba(255, 255, 255, 0.25)',
+        marginTop: 1,
         fontWeight: '500',
     },
     alarmRow: {
         flexDirection: 'row',
         alignItems: 'center',
-        marginTop: 6,
-        backgroundColor: 'rgba(0, 122, 255, 0.08)',
-        alignSelf: 'flex-start',
-        paddingHorizontal: 8,
-        paddingVertical: 3,
-        borderRadius: 8,
+        marginTop: 4,
     },
     alarmText: {
-        fontSize: 11,
-        color: '#007AFF', // iOS blue
-        fontWeight: '700',
-        marginLeft: 4,
-    },
-    creationText: {
         fontSize: 10,
-        color: '#BCBCC0',
-        marginTop: 8,
-        fontWeight: '600',
-        letterSpacing: 0.2,
-        textTransform: 'uppercase',
+        color: '#0EA5E9',
+        fontWeight: '700',
+        marginLeft: 6,
+        opacity: 0.8,
     },
     deleteButton: {
-        paddingHorizontal: 20,
-        paddingVertical: 15,
-    },
-    checkbox: {
-        width: 26,
-        height: 26,
-        borderRadius: 13, // Circular
-        borderWidth: 2,
-        borderColor: '#E5E5EA', // iOS separator/mid-gray
+        width: 44,
+        height: 44,
         alignItems: 'center',
         justifyContent: 'center',
-        backgroundColor: 'white',
+    },
+    checkbox: {
+        width: 22,
+        height: 22,
+        borderRadius: 6, // Slightly squared like the reference
+        borderWidth: 2,
+        borderColor: 'rgba(255, 255, 255, 0.2)',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: 'transparent',
     },
     checkboxChecked: {
-        backgroundColor: '#34C759', // iOS Green
-        borderColor: '#34C759',
+        backgroundColor: '#0EA5E9',
+        borderColor: '#0EA5E9',
     },
 });

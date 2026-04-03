@@ -1,106 +1,115 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Stack, useRouter } from 'expo-router';
 import React from 'react';
-import { SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import {
+    SafeAreaView,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View
+} from 'react-native';
+
+import { useTheme } from '../context/ThemeContext';
 
 export default function TermsScreen() {
     const router = useRouter();
+    const { colors, theme } = useTheme();
 
     return (
-        <SafeAreaView style={styles.container}>
-            <Stack.Screen options={{
-                title: 'Terms of Service',
-                headerShown: true,
-                headerLeft: () => (
-                    <TouchableOpacity
-                        onPress={() => router.replace('/')}
-                        style={styles.backButton}
-                        activeOpacity={0.7}
-                    >
-                        <Ionicons name="arrow-back" size={24} color="white" />
-                    </TouchableOpacity>
-                ),
-                headerStyle: { backgroundColor: '#0a7ea4' },
-                headerTintColor: 'white',
-            }} />
+        <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
 
             <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-                <View style={styles.content}>
-                    <Text style={styles.title}>Terms of Service</Text>
-                    <Text style={styles.date}>Effective Date: March 2026</Text>
+                <View style={styles.contentHeader}>
+                    <Ionicons name="document-text-outline" size={48} color={colors.header} />
+                    <Text style={[styles.mainTitle, { color: colors.text }]}>Terms of Service</Text>
+                    <Text style={[styles.lastUpdated, { color: colors.secondaryText }]}>LAST UPDATED: MARCH 31, 2026</Text>
+                </View>
 
-                    <Text style={styles.paragraph}>
-                        By using Remi Todo, you agree to these basic terms.
-                    </Text>
-
-                    <Text style={styles.sectionTitle}>1. Use of the App</Text>
-                    <Text style={styles.paragraph}>
-                        Remi Todo is provided "as is". You are responsible for maintaining your tasks and reminders. We do not provide cloud backups, so if you delete the app, your tasks will be lost forever.
-                    </Text>
-
-                    <Text style={styles.sectionTitle}>2. Account Deletion</Text>
-                    <Text style={styles.paragraph}>
-                        Since the app stores data locally, deleting the application will effectively delete all your data. We do not maintain any user accounts on external servers.
-                    </Text>
-
-                    <Text style={styles.sectionTitle}>3. Changes to Terms</Text>
-                    <Text style={styles.paragraph}>
-                        We reserve the right to modify these terms at any time.
-                    </Text>
-
-                    <Text style={styles.sectionTitle}>4. Disclaimer</Text>
-                    <Text style={styles.paragraph}>
-                        Remi Todo will not be held liable for missed tasks or alarms if your device is turned off, in silent mode, or if the notification permissions are disabled.
-                    </Text>
+                <View style={styles.entryContainer}>
+                    <TermEntry 
+                        title="1. Cloud Syncing" 
+                        text="When you sign in with Google, you agree to allow Remi to safely back up your missions to the cloud and your Google Calendar." 
+                        colors={colors}
+                    />
+                    <TermEntry 
+                        title="2. Data Control" 
+                        text="You own your missions. You can delete them from your phone or the cloud at any time." 
+                        colors={colors}
+                    />
+                    <TermEntry 
+                        title="3. Pure Experience" 
+                        text="We promise to never show you ads or sell your data. Remi is a clean and professional space for your work." 
+                        colors={colors}
+                    />
                 </View>
             </ScrollView>
         </SafeAreaView>
     );
 }
 
+function TermEntry({ title, text, colors }: { title: string, text: string, colors: any }) {
+    return (
+        <View style={[styles.entryCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+            <Text style={[styles.entryTitle, { color: colors.header }]}>{title}</Text>
+            <Text style={[styles.entryText, { color: colors.text }]}>{text}</Text>
+        </View>
+    );
+}
+
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#F8F9FA',
-    },
-    scrollContent: {
-        padding: 24,
     },
     backButton: {
-        marginLeft: 16,
-        padding: 8,
+        marginLeft: 15,
+        padding: 5,
     },
-    content: {
-        backgroundColor: 'white',
-        padding: 24,
-        borderRadius: 24,
+    scrollContent: {
+        paddingBottom: 60,
+    },
+    contentHeader: {
+        alignItems: 'center',
+        paddingVertical: 55,
+        paddingHorizontal: 40,
+    },
+    mainTitle: {
+        fontSize: 34,
+        fontWeight: '900',
+        marginTop: 20,
+        letterSpacing: -0.5,
+    },
+    lastUpdated: {
+        fontSize: 12,
+        marginTop: 8,
+        fontWeight: '700',
+        textTransform: 'uppercase',
+        letterSpacing: 2,
+        opacity: 0.5,
+    },
+    entryContainer: {
+        paddingHorizontal: 25,
+    },
+    entryCard: {
+        marginBottom: 20,
+        padding: 25,
+        borderRadius: 20,
+        borderWidth: 1,
         shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
         shadowOpacity: 0.05,
         shadowRadius: 10,
         elevation: 2,
     },
-    title: {
-        fontSize: 24,
+    entryTitle: {
+        fontSize: 19,
         fontWeight: '800',
-        color: '#1A1A1A',
-        marginBottom: 8,
+        marginBottom: 15,
     },
-    date: {
-        fontSize: 14,
-        color: '#999',
-        marginBottom: 24,
+    entryText: {
+        fontSize: 16,
+        lineHeight: 25,
+        opacity: 0.8,
+        fontWeight: '500',
     },
-    sectionTitle: {
-        fontSize: 18,
-        fontWeight: '700',
-        color: '#0a7ea4',
-        marginTop: 20,
-        marginBottom: 10,
-    },
-    paragraph: {
-        fontSize: 15,
-        color: '#555',
-        lineHeight: 24,
-        marginBottom: 10,
-    }
 });
