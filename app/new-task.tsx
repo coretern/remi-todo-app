@@ -22,7 +22,14 @@ export default function NewTaskScreen() {
     const router = useRouter();
     const { addTodo } = useTodos();
     const { colors, theme, timeFormat } = useTheme();
+    
     const [task, setTask] = useState('');
+    const [userName, setUserName] = useState('');
+    const [type, setType] = useState<'normal' | 'streak'>('normal');
+    const [streakTarget, setStreakTarget] = useState<number | undefined>(10);
+    const [customTarget, setCustomTarget] = useState('');
+    const [icon, setIcon] = useState<'youtube' | 'instagram' | 'default'>('default');
+    
     const [showDatePicker, setShowDatePicker] = useState(false);
     const [showTimePicker, setShowTimePicker] = useState(false);
     const [dueDate, setDueDate] = useState<Date | null>(null);
@@ -32,7 +39,17 @@ export default function NewTaskScreen() {
     const handleSave = async () => {
         if (task.trim()) {
             const finalOffset = customOffset ? parseInt(customOffset) : reminderOffset;
-            await addTodo(task, dueDate ? dueDate.getTime() : undefined, finalOffset);
+            const finalTarget = customTarget ? parseInt(customTarget) : streakTarget;
+            
+            await addTodo(
+                task, 
+                type, 
+                userName.trim() || 'Champion',
+                type === 'streak' ? finalTarget : undefined,
+                icon,
+                dueDate ? dueDate.getTime() : undefined, 
+                finalOffset
+            );
             LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
             router.back();
         }
@@ -58,46 +75,80 @@ export default function NewTaskScreen() {
 
     const formatDate = (date: Date) => {
         return date.toLocaleDateString('en-GB', {
-            weekday: 'short',
-            day: 'numeric',
-            month: 'long',
-            year: 'numeric'
+            weekday: 'short', day: 'numeric', month: 'long', year: 'numeric'
         });
     };
 
     const formatTime = (date: Date) => {
         return date.toLocaleTimeString(timeFormat === '12h' ? 'en-US' : 'en-GB', { 
-            hour: 'numeric', 
-            minute: '2-digit', 
-            hour12: timeFormat === '12h' 
+            hour: 'numeric', minute: '2-digit', hour12: timeFormat === '12h' 
         });
     };
 
     return (
         <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
-            <Stack.Screen options={{
-                title: 'New Mission',
-            }} />
+            <Stack.Screen options={{ title: 'New Mission' }} />
 
             <KeyboardAvoidingView 
                 behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
                 style={{ flex: 1 }}
             >
                 <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
+                    
+                    {/* Mission Type Selection */}
+                    <View style={styles.section}>
+                        <Text style={[styles.sectionLabel, { color: colors.header }]}>Mission Type</Text>
+                        <View style={styles.typeRow}>
+                            <TouchableOpacity 
+                                style={[styles.typeBtn, type === 'normal' && { backgroundColor: colors.header, borderColor: colors.header }]} 
+                                onPress={() => {
+                                    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+                                    setType('normal');
+                                }}
+                            >
+                                <Ionicons name="list" size={18} color={type === 'normal' ? 'white' : colors.text} />
+                                <Text style={[styles.typeBtnText, { color: type === 'normal' ? 'white' : colors.text }]}>Normal Task</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity 
+                                style={[styles.typeBtn, type === 'streak' && { backgroundColor: colors.header, borderColor: colors.header }]} 
+                                onPress={() => {
+                                    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+                                    setType('streak');
+                                }}
+                            >
+                                <Ionicons name="flame" size={18} color={type === 'streak' ? 'white' : colors.text} />
+                                <Text style={[styles.typeBtnText, { color: type === 'streak' ? 'white' : colors.text }]}>Daily Streak</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+
+                    {/* Personalized Name Section */}
+                    {type === 'streak' && (
+                        <View style={styles.section}>
+                            <Text style={[styles.sectionLabel, { color: colors.header }]}>Real Name (for Certificate)</Text>
+                            <View style={styles.inputRow}>
+                                <TextInput
+                                    style={[styles.taskInput, { color: colors.text }]}
+                                    placeholder="Enter Your Name"
+                                    placeholderTextColor={colors.secondaryText}
+                                    value={userName}
+                                    onChangeText={setUserName}
+                                />
+                            </View>
+                            <View style={[styles.underline, { backgroundColor: colors.border }]} />
+                        </View>
+                    )}
+
+                    {/* Mission Description Section */}
                     <View style={styles.section}>
                         <Text style={[styles.sectionLabel, { color: colors.header }]}>What is to be done?</Text>
                         <View style={styles.inputRow}>
                             <TextInput
                                 style={[styles.taskInput, { color: colors.text }]}
-                                placeholder="Enter Task Here"
+                                placeholder={type === 'streak' ? "e.g. Make a Reel daily" : "Enter Task Here"}
                                 placeholderTextColor={colors.secondaryText}
                                 value={task}
-                                onChangeText={(text) => {
-                                    setTask(text);
-                                    if (text.length > 0 && task.length === 0) {
-                                        LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-                                    }
-                                }}
+                                onChangeText={setTask}
                                 onSubmitEditing={handleSave}
                                 returnKeyType="done"
                                 autoFocus
@@ -115,18 +166,63 @@ export default function NewTaskScreen() {
                         <View style={[styles.underline, { backgroundColor: colors.border }]} />
                     </View>
 
+                    {type === 'streak' && (
+                        <View style={styles.section}>
+                            <Text style={[styles.sectionLabel, { color: colors.header }]}>Streak Target (Days)</Text>
+                            <View style={styles.chipRow}>
+                                {[10, 20, 30].map(val => (
+                                    <TouchableOpacity 
+                                        key={val} 
+                                        style={[styles.chip, streakTarget === val && !customTarget && { backgroundColor: colors.header, borderColor: colors.header }]}
+                                        onPress={() => { setStreakTarget(val); setCustomTarget(''); }}
+                                    >
+                                        <Text style={[styles.chipText, { color: colors.text }, streakTarget === val && !customTarget && { color: 'white' }]}>{val} Days</Text>
+                                    </TouchableOpacity>
+                                ))}
+                            </View>
+                            <View style={[styles.customRow, { marginTop: 10 }]}>
+                                <TextInput
+                                    style={[styles.customInput, { color: colors.text, borderColor: colors.border }]}
+                                    placeholder="Custom"
+                                    placeholderTextColor={colors.secondaryText}
+                                    keyboardType="numeric"
+                                    value={customTarget}
+                                    onChangeText={(t) => { setCustomTarget(t); setStreakTarget(undefined); }}
+                                />
+                                <Text style={{ color: colors.secondaryText, fontSize: 12, marginLeft: 10 }}>days goal</Text>
+                            </View>
+
+                            <Text style={[styles.sectionLabel, { color: colors.header, marginTop: 24 }]}>Identify Mission With</Text>
+                            <View style={styles.iconRow}>
+                                {[
+                                    { id: 'default', icon: 'star-outline' },
+                                    { id: 'youtube', icon: 'logo-youtube', color: '#FF0000' },
+                                    { id: 'instagram', icon: 'logo-instagram', color: '#E1306C' }
+                                ].map(item => (
+                                    <TouchableOpacity 
+                                        key={item.id} 
+                                        style={[styles.iconBtn, icon === item.id && { backgroundColor: 'rgba(0,0,0,0.05)', borderColor: colors.header }]} 
+                                        onPress={() => setIcon(item.id as any)}
+                                    >
+                                        <Ionicons name={item.icon as any} size={28} color={item.color || colors.text} />
+                                        <Text style={[styles.iconLabel, { color: colors.secondaryText }, icon === item.id && { color: colors.header }]}>
+                                            {item.id.charAt(0).toUpperCase() + item.id.slice(1)}
+                                        </Text>
+                                    </TouchableOpacity>
+                                ))}
+                            </View>
+                        </View>
+                    )}
+
                     <View style={styles.section}>
-                        <Text style={[styles.sectionLabel, { color: colors.header }]}>Due date</Text>
+                        <Text style={[styles.sectionLabel, { color: colors.header }]}>Optional Due date & Reminder</Text>
                         <TouchableOpacity style={styles.pickerRow} onPress={() => setShowDatePicker(true)}>
                             <Text style={[styles.pickerText, { color: colors.text }, !dueDate && { color: colors.secondaryText }]}>
-                                {dueDate ? formatDate(dueDate) : 'Date not set'}
+                                {dueDate ? formatDate(dueDate) : 'Never (Manual)'}
                             </Text>
                             <Ionicons name="calendar-outline" size={22} color={colors.header} />
                             {dueDate && (
-                                <TouchableOpacity onPress={() => {
-                                    setDueDate(null);
-                                    setReminderOffset(undefined);
-                                }} style={styles.clearBtn}>
+                                <TouchableOpacity onPress={() => { setDueDate(null); setReminderOffset(undefined); }} style={styles.clearBtn}>
                                     <Ionicons name="close-circle" size={20} color={colors.secondaryText} />
                                 </TouchableOpacity>
                             )}
@@ -140,74 +236,16 @@ export default function NewTaskScreen() {
                                     <Ionicons name="time-outline" size={22} color={colors.header} />
                                 </TouchableOpacity>
                                 <View style={[styles.underline, { backgroundColor: colors.border }]} />
-
-                                {/* Reminder Selection */}
-                                <View style={{ marginTop: 24 }}>
-                                    <Text style={[styles.sectionLabel, { color: colors.header, marginBottom: 16 }]}>Remind Me</Text>
-                                    <View style={styles.chipRow}>
-                                        {[
-                                            { label: 'On time', value: 0 },
-                                            { label: '2 min', value: 2 },
-                                            { label: '10 min', value: 10 },
-                                            { label: '20 min', value: 20 }
-                                        ].map(opt => (
-                                            <TouchableOpacity 
-                                                key={opt.value} 
-                                                style={[
-                                                    styles.chip, 
-                                                    reminderOffset === opt.value && !customOffset && { backgroundColor: colors.header, borderColor: colors.header }
-                                                ]}
-                                                onPress={() => {
-                                                    setReminderOffset(opt.value);
-                                                    setCustomOffset('');
-                                                }}
-                                            >
-                                                <Text style={[
-                                                    styles.chipText, 
-                                                    { color: colors.text },
-                                                    reminderOffset === opt.value && !customOffset && { color: 'white' }
-                                                ]}>{opt.label}</Text>
-                                            </TouchableOpacity>
-                                        ))}
-                                    </View>
-
-                                    <View style={[styles.customRow, { marginTop: 16, flexDirection: 'row', alignItems: 'center' }]}>
-                                        <TextInput
-                                            style={[styles.customInput, { color: colors.text, borderColor: colors.border, borderWidth: 1, borderRadius: 8, paddingHorizontal: 12, paddingVertical: 6, width: 100, fontSize: 13 }]}
-                                            placeholder="Custom"
-                                            placeholderTextColor={colors.secondaryText}
-                                            keyboardType="numeric"
-                                            value={customOffset}
-                                            onChangeText={(t) => {
-                                                setCustomOffset(t);
-                                                if (t) setReminderOffset(undefined);
-                                            }}
-                                        />
-                                        <Text style={{ color: colors.secondaryText, fontSize: 12, marginLeft: 10 }}>mins before mission</Text>
-                                    </View>
-                                </View>
                             </>
                         )}
                     </View>
                 </ScrollView>
 
-
-                {Platform.OS !== 'web' && showDatePicker && (
-                    <DateTimePicker
-                        value={dueDate || new Date()}
-                        mode="date"
-                        display={Platform.OS === 'ios' ? 'spinner' : 'calendar'}
-                        onChange={onDateChange}
-                    />
-                )}
-                {Platform.OS !== 'web' && showTimePicker && (
-                    <DateTimePicker
-                        value={dueDate || new Date()}
-                        mode="time"
-                        display={Platform.OS === 'ios' ? 'spinner' : 'clock'}
-                        is24Hour={timeFormat === '24h'}
-                        onChange={onTimeChange}
-                    />
+                {Platform.OS !== 'web' && (
+                    <>
+                        {showDatePicker && <DateTimePicker value={dueDate || new Date()} mode="date" display={Platform.OS === 'ios' ? 'spinner' : 'calendar'} onChange={onDateChange} />}
+                        {showTimePicker && <DateTimePicker value={dueDate || new Date()} mode="time" display={Platform.OS === 'ios' ? 'spinner' : 'clock'} is24Hour={timeFormat === '24h'} onChange={onTimeChange} />}
+                    </>
                 )}
             </KeyboardAvoidingView>
         </SafeAreaView>
@@ -261,11 +299,52 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     customInput: {
-        width: 70,
-        height: 36,
+        width: 100,
+        height: 44,
         borderWidth: 1,
         borderRadius: 8,
-        paddingHorizontal: 10,
+        paddingHorizontal: 15,
         fontSize: 14,
+        fontWeight: '600',
+    },
+    typeRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginTop: 5,
+    },
+    typeBtn: {
+        flex: 0.48,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingVertical: 12,
+        borderRadius: 12,
+        borderWidth: 1.5,
+        borderColor: '#e0e0e0',
+    },
+    typeBtnText: {
+        fontSize: 14,
+        fontWeight: '700',
+        marginLeft: 8,
+    },
+    iconRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginTop: 15,
+    },
+    iconBtn: {
+        flex: 0.3,
+        alignItems: 'center',
+        paddingVertical: 15,
+        borderRadius: 15,
+        borderWidth: 2,
+        borderColor: 'transparent',
+    },
+    iconLabel: {
+        fontSize: 11,
+        fontWeight: '800',
+        marginTop: 8,
+        textTransform: 'uppercase',
+        letterSpacing: 0.5,
     }
 });

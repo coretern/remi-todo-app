@@ -4,6 +4,7 @@ import { useNavigation, useRouter } from 'expo-router';
 import React, { useRef, useState } from 'react';
 import {
     ActivityIndicator,
+    Alert,
     FlatList,
     Image,
     Keyboard,
@@ -38,6 +39,7 @@ export default function HomeScreen() {
         addTodo,
         toggleTodo: originalToggleTodo,
         deleteTodo: originalDeleteTodo,
+        pinTodo: originalPinTodo,
         clearCompleted: originalClearCompleted,
         isLoading,
         count,
@@ -65,8 +67,63 @@ export default function HomeScreen() {
     };
 
     const deleteTodo = (id: string) => {
+        const todo = todos.find(t => t.id === id);
+        if (!todo) return;
+
+        if (todo.type === 'streak') {
+            // STREAK DOUBLE CONFIRMATION 🛡️
+            Alert.alert(
+                "Delete Streak?",
+                "This will permanently erase your daily progress and statistics. Are you absolutely sure?",
+                [
+                    { text: "Cancel", style: "cancel" },
+                    { 
+                        text: "Yes, Delete", 
+                        style: "destructive",
+                        onPress: () => {
+                            // FINAL SECOND CONFIRMATION 🛑
+                            Alert.alert(
+                                "FINAL WARNING",
+                                "Progress for this streak will be wiped from your Cloud Backup. This cannot be undone!",
+                                [
+                                    { text: "Keep My Streak", style: "cancel" },
+                                    { 
+                                        text: "DELETE FOREVER", 
+                                        style: "destructive",
+                                        onPress: () => {
+                                            LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+                                            originalDeleteTodo(id);
+                                        }
+                                    }
+                                ]
+                            );
+                        }
+                    }
+                ]
+            );
+        } else {
+            // NORMAL MISSION SINGLE CONFIRMATION
+            Alert.alert(
+                "Delete Mission?",
+                "Are you sure you want to remove this task?",
+                [
+                    { text: "Cancel", style: "cancel" },
+                    { 
+                        text: "Delete", 
+                        style: "destructive",
+                        onPress: () => {
+                            LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+                            originalDeleteTodo(id);
+                        }
+                    }
+                ]
+            );
+        }
+    };
+
+    const pinTodo = (id: string) => {
         LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-        originalDeleteTodo(id);
+        originalPinTodo(id);
     };
 
     const clearCompleted = () => {
@@ -199,6 +256,7 @@ export default function HomeScreen() {
                             todo={item}
                             onToggle={toggleTodo}
                             onDelete={deleteTodo}
+                            onPin={pinTodo}
                         />
                     )}
                     contentContainerStyle={[

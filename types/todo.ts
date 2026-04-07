@@ -3,14 +3,25 @@ export interface Todo {
     task: string;
     completed: boolean;
     createdAt: number;
-    completedAt?: number; // Exact time when mission was finished
+    completedAt?: number;
     dueDate?: number;
     reminderId?: string;
-    reminderOffset?: number; // Minutes before due date
+    userName?: string;
+    reminderOffset?: number;
+    
+    // Streak System (New)
+    type: 'normal' | 'streak';
+    streakTarget?: number;     // e.g. 10, 20, Custom
+    currentStreak?: number;    // Count: Day 1, Day 2...
+    lastCompletedDate?: string; // Track: "2026-04-01" to block checkboxes
+    isBroken?: boolean;        // Moved to History: Streak Failed
+    isPinned?: boolean;        // Master feature: Top of Home
+    icon?: 'youtube' | 'instagram' | 'default';
 }
 
 export type TodoAction =
-    | { type: 'ADD_TODO'; payload: { task: string; dueDate?: number } }
+    | { type: 'ADD_TODO'; payload: { task: string; type: 'normal' | 'streak'; streakTarget?: number; icon?: 'youtube' | 'instagram' | 'default' } }
     | { type: 'TOGGLE_TODO'; payload: string }
     | { type: 'DELETE_TODO'; payload: string }
+    | { type: 'PIN_TODO'; payload: string }
     | { type: 'CLEAR_COMPLETED' };
