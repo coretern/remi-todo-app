@@ -23,6 +23,7 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import TodoItem from '../components/todo/TodoItem/TodoItem';
+import CertificateModal from '../components/todo/CertificateModal';
 import { useTheme } from '../context/ThemeContext';
 import { useTodos } from '../hooks/useTodos';
 
@@ -51,6 +52,7 @@ export default function HomeScreen() {
     const [isSearching, setIsSearching] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
     const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
+    const [selectedCert, setSelectedCert] = useState<any>(null);
 
     React.useEffect(() => {
         const showSub = Keyboard.addListener(Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow', () => setIsKeyboardVisible(true));
@@ -257,6 +259,7 @@ export default function HomeScreen() {
                             onToggle={toggleTodo}
                             onDelete={deleteTodo}
                             onPin={pinTodo}
+                            onShowCert={setSelectedCert}
                         />
                     )}
                     contentContainerStyle={[
@@ -285,6 +288,12 @@ export default function HomeScreen() {
                 >
                     <Ionicons name="add" size={36} color="#006EAF" />
                 </TouchableOpacity>
+
+                <CertificateModal 
+                    visible={!!selectedCert} 
+                    selectedCert={selectedCert} 
+                    onClose={() => setSelectedCert(null)} 
+                />
             </View>
         </View>
     );

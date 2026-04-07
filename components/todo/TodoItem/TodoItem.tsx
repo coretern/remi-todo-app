@@ -9,11 +9,12 @@ interface TodoItemProps {
     onToggle: (id: string) => void;
     onDelete: (id: string) => void;
     onPin?: (id: string) => void;
+    onShowCert?: (todo: Todo) => void;
 }
 
 import { useTheme } from '../../../context/ThemeContext';
 
-const TodoItem: React.FC<TodoItemProps> = ({ todo, onToggle, onDelete, onPin }) => {
+const TodoItem: React.FC<TodoItemProps> = ({ todo, onToggle, onDelete, onPin, onShowCert }) => {
     const { colors, theme, timeFormat } = useTheme();
     const today = new Date().toISOString().split('T')[0];
     
@@ -83,6 +84,11 @@ const TodoItem: React.FC<TodoItemProps> = ({ todo, onToggle, onDelete, onPin }) 
             </View>
 
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                {onShowCert && todo.type === 'streak' && todo.completed && !todo.isBroken && (
+                    <TouchableOpacity onPress={() => onShowCert(todo)} style={{ padding: 8 }}>
+                        <Ionicons name="ribbon" size={20} color="#FFD700" />
+                    </TouchableOpacity>
+                )}
                 {onPin && !todo.completed && (
                     <TouchableOpacity onPress={() => onPin(todo.id)} style={{ padding: 8, opacity: todo.isPinned ? 1 : 0.35 }}>
                         <Ionicons name={todo.isPinned ? "pin" : "pin-outline"} size={18} color={todo.isPinned ? colors.header : colors.secondaryText} />
