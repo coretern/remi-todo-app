@@ -34,7 +34,7 @@ export default function DeveloperScreen() {
 
                 <View style={styles.bioSection}>
                     <Text style={[styles.bioText, { color: colors.text }]}>
-                        Hi, I'm ANIL KUMAR! I am a B.Tech Computer Science student. Since I was in 8th or 9th class, I always dreamed of making my own apps and putting them on the Play Store. It was my childhood goal to see my work used by people around the world.
+                        Hi, I&apos;m ANIL KUMAR! I am a B.Tech Computer Science student. Since I was in 8th or 9th class, I always dreamed of making my own apps and putting them on the Play Store. It was my childhood goal to see my work used by people around the world.
                     </Text>
                     <Text style={[styles.bioText, { color: colors.text }]}>
                         Today, I have made that dream come true! After many years of learning and hard work, I have successfully published Remi Todo. It took a lot of learning about coding and the publishing process to get here.

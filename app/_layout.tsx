@@ -6,10 +6,12 @@ import { useEffect } from 'react';
 import { Platform, TouchableOpacity, StatusBar } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
+import Constants from 'expo-constants';
+
+import { TodoProvider } from '../context/TodoContext';
+
 // Keep the splash screen visible while we fetch resources
 SplashScreen.preventAutoHideAsync().catch(() => { });
-
-import Constants from 'expo-constants';
 
 // Safety wrapper to avoid crashes on Expo Go SDK 53
 const initNotifications = async () => {
@@ -29,8 +31,6 @@ const initNotifications = async () => {
         console.warn('Notifications init failed:', e);
     }
 };
-
-import { TodoProvider } from '../context/TodoContext';
 
 export default function RootLayout() {
     useEffect(() => {

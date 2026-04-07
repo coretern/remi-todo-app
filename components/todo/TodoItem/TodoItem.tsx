@@ -4,6 +4,8 @@ import { Text, TouchableOpacity, View, ScrollView, Image } from 'react-native';
 import { Todo } from '../../../types/todo';
 import { styles } from './styles';
 
+import { useTheme } from '../../../context/ThemeContext';
+
 interface TodoItemProps {
     todo: Todo;
     onToggle: (id: string) => void;
@@ -11,8 +13,6 @@ interface TodoItemProps {
     onPin?: (id: string) => void;
     onShowCert?: (todo: Todo) => void;
 }
-
-import { useTheme } from '../../../context/ThemeContext';
 
 const TodoItem: React.FC<TodoItemProps> = ({ todo, onToggle, onDelete, onPin, onShowCert }) => {
     const { colors, theme, timeFormat } = useTheme();

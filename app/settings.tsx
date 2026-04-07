@@ -38,6 +38,7 @@ export default function SettingsScreen() {
     // Google Sign-In Configuration: Official Native Android Flow (Simplified Final Polish)
     const [request, response, promptAsync] = Google.useAuthRequest({
         androidClientId: '76113847872-sh64cu11m2mekqaaggslht2alsqlb3k1.apps.googleusercontent.com',
+        webClientId: '76113847872-sh64cu11m2mekqaaggslht2alsqlb3k1.apps.googleusercontent.com',
         redirectUri: AuthSession.makeRedirectUri({
             scheme: 'com.remi.todoapp',
         }),

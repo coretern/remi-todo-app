@@ -46,6 +46,8 @@ const AddTodoInput = forwardRef<TextInput, AddTodoInputProps>(({ onAdd }, ref) =
     );
 });
 
+AddTodoInput.displayName = 'AddTodoInput';
+
 const styles = StyleSheet.create({
     container: {
         flex: 1,

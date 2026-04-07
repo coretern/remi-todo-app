@@ -81,7 +81,10 @@
             "enableShrinkResourcesInReleaseBuilds": true
           }
         }
-      ]
+      ],
+      "@react-native-community/datetimepicker",
+      "expo-font",
+      "expo-image"
     ],
     "experiments": {
       "typedRoutes": true,
