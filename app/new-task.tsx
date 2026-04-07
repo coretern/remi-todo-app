@@ -13,7 +13,8 @@ import {
     TextInput,
     TouchableOpacity,
     View,
-    LayoutAnimation
+    LayoutAnimation,
+    Image
 } from 'react-native';
 import { useTodos } from '../hooks/useTodos';
 import { useTheme } from '../context/ThemeContext';
@@ -85,6 +86,15 @@ export default function NewTaskScreen() {
         });
     };
 
+    const handleTaskChange = (text: string) => {
+        const wordCount = text.trim().split(/\s+/).filter(w => w.length > 0).length;
+        if (wordCount <= 12 || text.length < task.length) {
+            setTask(text);
+        }
+    };
+
+    const currentWordCount = task.trim().split(/\s+/).filter(w => w.length > 0).length;
+
     return (
         <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
             <Stack.Screen options={{ title: 'New Mission' }} />
@@ -148,7 +158,7 @@ export default function NewTaskScreen() {
                                 placeholder={type === 'streak' ? "e.g. Make a Reel daily" : "Enter Task Here"}
                                 placeholderTextColor={colors.secondaryText}
                                 value={task}
-                                onChangeText={setTask}
+                                onChangeText={handleTaskChange}
                                 onSubmitEditing={handleSave}
                                 returnKeyType="done"
                                 autoFocus
@@ -164,13 +174,16 @@ export default function NewTaskScreen() {
                             )}
                         </View>
                         <View style={[styles.underline, { backgroundColor: colors.border }]} />
+                        <Text style={{ fontSize: 10, color: currentWordCount === 12 ? '#EF4444' : colors.secondaryText, marginTop: 6, alignSelf: 'flex-end', fontWeight: 'bold' }}>
+                            {currentWordCount}/12 words
+                        </Text>
                     </View>
 
                     {type === 'streak' && (
                         <View style={styles.section}>
                             <Text style={[styles.sectionLabel, { color: colors.header }]}>Streak Target (Days)</Text>
                             <View style={styles.chipRow}>
-                                {[10, 20, 30].map(val => (
+                                {[5, 15, 30].map(val => (
                                     <TouchableOpacity 
                                         key={val} 
                                         style={[styles.chip, streakTarget === val && !customTarget && { backgroundColor: colors.header, borderColor: colors.header }]}
@@ -195,18 +208,23 @@ export default function NewTaskScreen() {
                             <Text style={[styles.sectionLabel, { color: colors.header, marginTop: 24 }]}>Identify Mission With</Text>
                             <View style={styles.iconRow}>
                                 {[
-                                    { id: 'default', icon: 'star-outline' },
-                                    { id: 'youtube', icon: 'logo-youtube', color: '#FF0000' },
-                                    { id: 'instagram', icon: 'logo-instagram', color: '#E1306C' }
+                                    { id: 'default', ionicIcon: 'star-outline' },
+                                    { id: 'youtube', source: require('../assets/icon/YouTube.jpeg'), title: 'YouTube' },
+                                    { id: 'instagram', source: require('../assets/icon/Instagram.jpeg'), title: 'Instagram' },
+                                    { id: 'study', source: require('../assets/icon/study.jpeg'), title: 'Study' }
                                 ].map(item => (
                                     <TouchableOpacity 
                                         key={item.id} 
                                         style={[styles.iconBtn, icon === item.id && { backgroundColor: 'rgba(0,0,0,0.05)', borderColor: colors.header }]} 
                                         onPress={() => setIcon(item.id as any)}
                                     >
-                                        <Ionicons name={item.icon as any} size={28} color={item.color || colors.text} />
-                                        <Text style={[styles.iconLabel, { color: colors.secondaryText }, icon === item.id && { color: colors.header }]}>
-                                            {item.id.charAt(0).toUpperCase() + item.id.slice(1)}
+                                        {item.id === 'default' ? (
+                                            <Ionicons name={item.ionicIcon as any} size={30} color={colors.text} />
+                                        ) : (
+                                            <Image source={item.source} style={{ width: 30, height: 30, borderRadius: 8 }} resizeMode="cover" />
+                                        )}
+                                        <Text style={[styles.iconLabel, { color: colors.secondaryText }, icon === item.id && { color: colors.header }]} numberOfLines={1} adjustsFontSizeToFit>
+                                            {item.title || 'Default'}
                                         </Text>
                                     </TouchableOpacity>
                                 ))}
@@ -330,21 +348,23 @@ const styles = StyleSheet.create({
     iconRow: {
         flexDirection: 'row',
         justifyContent: 'space-between',
+        alignItems: 'flex-start',
         marginTop: 15,
     },
     iconBtn: {
-        flex: 0.3,
+        width: '23%',
         alignItems: 'center',
-        paddingVertical: 15,
-        borderRadius: 15,
-        borderWidth: 2,
+        paddingVertical: 12,
+        borderRadius: 12,
+        borderWidth: 1.5,
         borderColor: 'transparent',
     },
     iconLabel: {
-        fontSize: 11,
+        fontSize: 9,
         fontWeight: '800',
         marginTop: 8,
         textTransform: 'uppercase',
         letterSpacing: 0.5,
+        textAlign: 'center',
     }
 });

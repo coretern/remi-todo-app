@@ -9,6 +9,7 @@ import {
     Text,
     TouchableOpacity,
     View,
+    Image
 } from 'react-native';
 import { useTodos } from '../hooks/useTodos';
 import { useTheme } from '../context/ThemeContext';
@@ -22,15 +23,52 @@ export default function HistoryScreen() {
     const [selectedCert, setSelectedCert] = useState<any>(null);
     const completedMissions = todos.filter(t => t.completed || t.isBroken);
 
+    const confirmClearHistoryPhase2 = () => {
+        Alert.alert(
+            "Final Warning!",
+            "Are you absolutely sure? This action CANNOT be undone and will permanently wipe your entire history.",
+            [
+                { text: "Cancel", style: "cancel" },
+                { text: "WIPE EVERYTHING", style: "destructive", onPress: clearCompleted }
+            ]
+        );
+    };
+
     const handleClearHistory = () => {
         Alert.alert(
             "Clear History",
             "Are you sure you want to delete all completed missions forever?",
             [
                 { text: "Cancel", style: "cancel" },
-                { text: "Delete All", style: "destructive", onPress: clearCompleted }
+                { text: "Yes, continue", style: "destructive", onPress: confirmClearHistoryPhase2 }
             ]
         );
+    };
+
+    const confirmDeleteStreakPhase2 = (id: string, taskName: string) => {
+        Alert.alert(
+            "Final Warning!",
+            `Are you absolutely sure you want to permanently delete the streak "${taskName}"? This cannot be undone.`,
+            [
+                { text: "Cancel", style: "cancel" },
+                { text: "Permanently Delete", style: "destructive", onPress: () => deleteTodo(id) }
+            ]
+        );
+    };
+
+    const handleDeleteItem = (item: any) => {
+        if (item.type === 'streak') {
+            Alert.alert(
+                "Delete Streak",
+                `Are you sure you want to delete the streak "${item.task}"?`,
+                [
+                    { text: "Cancel", style: "cancel" },
+                    { text: "Yes, continue", style: "destructive", onPress: () => confirmDeleteStreakPhase2(item.id, item.task) }
+                ]
+            );
+        } else {
+            deleteTodo(item.id);
+        }
     };
 
     return (
@@ -72,11 +110,14 @@ export default function HistoryScreen() {
                             <View style={styles.textContainer}>
                                 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                                     {item.icon && item.icon !== 'default' && (
-                                        <Ionicons 
-                                            name={item.icon === 'youtube' ? 'logo-youtube' : 'logo-instagram'} 
-                                            size={12} 
-                                            color={item.icon === 'youtube' ? '#FF0000' : '#E1306C'} 
-                                            style={{ marginRight: 6 }}
+                                        <Image 
+                                            source={
+                                                item.icon === 'youtube' ? require('../assets/icon/YouTube.jpeg') :
+                                                item.icon === 'instagram' ? require('../assets/icon/Instagram.jpeg') :
+                                                item.icon === 'study' ? require('../assets/icon/study.jpeg') :
+                                                null
+                                            } 
+                                            style={{ width: 14, height: 14, marginRight: 6, borderRadius: 2 }} 
                                         />
                                     )}
                                     <Text style={[styles.taskText, { color: colors.text, textDecorationLine: item.isBroken ? 'none' : 'line-through' }]}>
@@ -114,7 +155,7 @@ export default function HistoryScreen() {
                                     <Ionicons name="refresh-outline" size={18} color={colors.secondaryText} />
                                 </TouchableOpacity>
                             )}
-                            <TouchableOpacity onPress={() => deleteTodo(item.id)} style={styles.actionBtn}>
+                            <TouchableOpacity onPress={() => handleDeleteItem(item)} style={styles.actionBtn}>
                                 <Ionicons name="trash-outline" size={18} color={colors.secondaryText} />
                             </TouchableOpacity>
                         </View>

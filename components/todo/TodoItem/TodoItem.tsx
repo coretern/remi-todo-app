@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
-import { Text, TouchableOpacity, View, ScrollView } from 'react-native';
+import { Text, TouchableOpacity, View, ScrollView, Image } from 'react-native';
 import { Todo } from '../../../types/todo';
 import { styles } from './styles';
 
@@ -35,7 +35,7 @@ const TodoItem: React.FC<TodoItemProps> = ({ todo, onToggle, onDelete, onPin, on
     };
 
     return (
-        <View style={[styles.container, { backgroundColor: colors.surface, borderColor: colors.border, paddingRight: 12, paddingVertical: 18 }]}>
+        <View style={[styles.container, { backgroundColor: colors.surface, borderColor: colors.border, paddingRight: 12 }]}>
             <View style={styles.content}>
                 <TouchableOpacity 
                     onPress={() => onToggle(todo.id)}
@@ -55,11 +55,14 @@ const TodoItem: React.FC<TodoItemProps> = ({ todo, onToggle, onDelete, onPin, on
                 <View style={styles.textContainer}>
                     <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                         {todo.icon && todo.icon !== 'default' && (
-                            <Ionicons 
-                                name={todo.icon === 'youtube' ? 'logo-youtube' : 'logo-instagram'} 
-                                size={14} 
-                                color={todo.icon === 'youtube' ? '#FF0000' : '#E1306C'} 
-                                style={{ marginRight: 6 }}
+                            <Image 
+                                source={
+                                    todo.icon === 'youtube' ? require('../../../assets/icon/YouTube.jpeg') :
+                                    todo.icon === 'instagram' ? require('../../../assets/icon/Instagram.jpeg') :
+                                    todo.icon === 'study' ? require('../../../assets/icon/study.jpeg') :
+                                    null
+                                } 
+                                style={{ width: 14, height: 14, marginRight: 6, borderRadius: 2 }} 
                             />
                         )}
                         <Text style={[styles.text, todo.completed && styles.completedText, { color: colors.text, fontSize: 16, fontWeight: '700', flexShrink: 1 }]}>

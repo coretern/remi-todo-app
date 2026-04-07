@@ -88,6 +88,8 @@ export const useNotifications = () => {
                         ? `${task} starts in ${minutesBefore} minutes!` 
                         : `Time for your mission: ${task}`,
                     data: { id },
+                    sound: true,
+                    vibrate: [0, 250, 250, 250],
                 },
                 trigger: {
                     type: Notifications.SchedulableTriggerInputTypes.DATE,

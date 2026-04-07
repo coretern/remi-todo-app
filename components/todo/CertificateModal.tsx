@@ -99,8 +99,8 @@ export default function CertificateModal({ visible, selectedCert, onClose }: Pro
                                     </View>
 
                                     <View style={styles.titleGroup}>
-                                        <Text style={styles.certTitle}>CERTIFICATE</Text>
-                                        <Text style={styles.certSubtitle}>OF MISSION MASTERY</Text>
+                                        <Text style={styles.certTitle} numberOfLines={1} adjustsFontSizeToFit>CERTIFICATE</Text>
+                                        <Text style={styles.certSubtitle} numberOfLines={1} adjustsFontSizeToFit>OF MISSION MASTERY</Text>
                                     </View>
                                     
                                     <View style={styles.certPresentedCol}>
@@ -220,19 +220,23 @@ const styles = StyleSheet.create({
     },
     titleGroup: {
         alignItems: 'center',
+        width: '100%',
+        paddingHorizontal: 5,
     },
     certTitle: {
         color: '#FFD700',
-        fontSize: 32,
+        fontSize: 30,
         fontWeight: '900',
-        letterSpacing: 5
+        letterSpacing: 3,
+        textAlign: 'center',
     },
     certSubtitle: {
         color: 'white',
         fontSize: 10,
         fontWeight: '800',
-        letterSpacing: 3,
-        marginTop: 4
+        letterSpacing: 2,
+        marginTop: 4,
+        textAlign: 'center',
     },
     certPresentedCol: {
         alignItems: 'center',

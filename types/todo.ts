@@ -16,11 +16,11 @@ export interface Todo {
     lastCompletedDate?: string; // Track: "2026-04-01" to block checkboxes
     isBroken?: boolean;        // Moved to History: Streak Failed
     isPinned?: boolean;        // Master feature: Top of Home
-    icon?: 'youtube' | 'instagram' | 'default';
+    icon?: 'youtube' | 'instagram' | 'study' | 'default';
 }
 
 export type TodoAction =
-    | { type: 'ADD_TODO'; payload: { task: string; type: 'normal' | 'streak'; streakTarget?: number; icon?: 'youtube' | 'instagram' | 'default' } }
+    | { type: 'ADD_TODO'; payload: { task: string; type: 'normal' | 'streak'; streakTarget?: number; icon?: 'youtube' | 'instagram' | 'study' | 'default' } }
     | { type: 'TOGGLE_TODO'; payload: string }
     | { type: 'DELETE_TODO'; payload: string }
     | { type: 'PIN_TODO'; payload: string }
