@@ -72,9 +72,9 @@ const TodoItem: React.FC<TodoItemProps> = ({ todo, onToggle, onDelete, onPin, on
 
                     <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 4 }}>
                         {todo.type === 'streak' && !todo.completed && (
-                            <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(255, 215, 0, 0.12)', paddingHorizontal: 8, paddingVertical: 3, borderRadius: 6, marginRight: 10, borderWidth: 0.5, borderColor: 'rgba(255, 215, 0, 0.3)' }}>
-                                <Ionicons name="flame" size={12} color="#FFD700" />
-                                <Text style={{ fontSize: 9, fontWeight: '900', color: '#FFD700', marginLeft: 4, letterSpacing: 1 }}>
+                            <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: theme === 'dark' ? 'rgba(255, 215, 0, 0.12)' : 'rgba(217, 119, 6, 0.12)', paddingHorizontal: 8, paddingVertical: 3, borderRadius: 6, marginRight: 10, borderWidth: 0.5, borderColor: theme === 'dark' ? 'rgba(255, 215, 0, 0.3)' : 'rgba(217, 119, 6, 0.3)' }}>
+                                <Ionicons name="flame" size={12} color={theme === 'dark' ? '#FFD700' : '#D97706'} />
+                                <Text style={{ fontSize: 9, fontWeight: '900', color: theme === 'dark' ? '#FFD700' : '#D97706', marginLeft: 4, letterSpacing: 1 }}>
                                     DAY {todo.currentStreak}/{todo.streakTarget}
                                 </Text>
                             </View>

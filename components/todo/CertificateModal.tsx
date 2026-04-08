@@ -284,7 +284,9 @@ const styles = StyleSheet.create({
         fontSize: 8,
         fontWeight: '800',
         marginTop: 2,
-        letterSpacing: 0.5
+        letterSpacing: 0.5,
+        alignSelf: 'center',
+        marginLeft: 12
     },
     certButtons: {
         flexDirection: 'row',

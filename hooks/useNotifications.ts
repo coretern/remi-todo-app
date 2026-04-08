@@ -94,6 +94,7 @@ export const useNotifications = () => {
                 trigger: {
                     type: Notifications.SchedulableTriggerInputTypes.DATE,
                     date: triggerDate,
+                    channelId: 'default',
                 },
             });
             console.log(`[Reminder Success] Native alert active with ID: ${notificationId}`);

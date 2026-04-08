@@ -128,7 +128,7 @@ export function TodoProvider({ children }: { children: React.ReactNode }) {
         dueDate?: number, 
         reminderOffset?: number
     ) => {
-        const todoId = Date.now().toString();
+        const todoId = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
         const newTodo: Todo = {
             id: todoId,
             task,

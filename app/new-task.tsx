@@ -42,15 +42,35 @@ export default function NewTaskScreen() {
             const finalOffset = customOffset ? parseInt(customOffset) : reminderOffset;
             const finalTarget = customTarget ? parseInt(customTarget) : streakTarget;
             
-            await addTodo(
-                task, 
-                type, 
-                userName.trim() || 'Champion',
-                type === 'streak' ? finalTarget : undefined,
-                icon,
-                dueDate ? dueDate.getTime() : undefined, 
-                finalOffset
-            );
+            if (type === 'normal') {
+                const tasks = task.split('\n').filter(t => t.trim().length > 0);
+                for (const t of tasks) {
+                    // Remove leading numbers (1., 2., 1), etc.)
+                    const cleanTask = t.trim().replace(/^[0-9]+[\.\)]\s*/, '');
+                    if (cleanTask) {
+                        await addTodo(
+                            cleanTask, 
+                            'normal', 
+                            userName.trim() || 'Champion',
+                            undefined,
+                            icon,
+                            dueDate ? dueDate.getTime() : undefined, 
+                            finalOffset
+                        );
+                    }
+                }
+            } else {
+                await addTodo(
+                    task.trim(), 
+                    'streak', 
+                    userName.trim() || 'Champion',
+                    finalTarget,
+                    icon,
+                    dueDate ? dueDate.getTime() : undefined, 
+                    finalOffset
+                );
+            }
+
             LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
             router.back();
         }
@@ -61,6 +81,7 @@ export default function NewTaskScreen() {
         if (selectedDate) {
             const newDate = dueDate || new Date();
             newDate.setFullYear(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate());
+            newDate.setSeconds(0, 0);
             setDueDate(new Date(newDate));
         }
     };
@@ -69,7 +90,7 @@ export default function NewTaskScreen() {
         setShowTimePicker(false);
         if (selectedTime) {
             const newDate = dueDate || new Date();
-            newDate.setHours(selectedTime.getHours(), selectedTime.getMinutes());
+            newDate.setHours(selectedTime.getHours(), selectedTime.getMinutes(), 0, 0);
             setDueDate(new Date(newDate));
         }
     };
@@ -88,7 +109,7 @@ export default function NewTaskScreen() {
 
     const handleTaskChange = (text: string) => {
         const wordCount = text.trim().split(/\s+/).filter(w => w.length > 0).length;
-        if (wordCount <= 12 || text.length < task.length) {
+        if (type === 'normal' || wordCount <= 12 || text.length < task.length) {
             setTask(text);
         }
     };
@@ -152,20 +173,21 @@ export default function NewTaskScreen() {
                     {/* Mission Description Section */}
                     <View style={styles.section}>
                         <Text style={[styles.sectionLabel, { color: colors.header }]}>What is to be done?</Text>
-                        <View style={styles.inputRow}>
+                        <View style={[styles.inputRow, type === 'normal' && { alignItems: 'flex-end' }]}>
                             <TextInput
-                                style={[styles.taskInput, { color: colors.text }]}
-                                placeholder={type === 'streak' ? "e.g. Make a Reel daily" : "Enter Task Here"}
+                                style={[styles.taskInput, { color: colors.text }, type === 'normal' && { minHeight: 80, textAlignVertical: 'top' }]}
+                                placeholder={type === 'streak' ? "e.g. Make a Reel daily" : "Enter Task Here\n(Tip: Press Enter to add numbering)"}
                                 placeholderTextColor={colors.secondaryText}
                                 value={task}
                                 onChangeText={handleTaskChange}
-                                onSubmitEditing={handleSave}
-                                returnKeyType="done"
+                                onSubmitEditing={type === 'streak' ? handleSave : undefined}
+                                returnKeyType={type === 'streak' ? "done" : "default"}
+                                multiline={type === 'normal'}
                                 autoFocus
                             />
                             {task.trim().length > 0 && (
                                 <TouchableOpacity 
-                                    style={[styles.inlineSaveBtn, { backgroundColor: colors.header }]} 
+                                    style={[styles.inlineSaveBtn, { backgroundColor: colors.header }, type === 'normal' && { marginBottom: 10 }]} 
                                     onPress={handleSave}
                                     activeOpacity={0.7}
                                 >
@@ -174,9 +196,11 @@ export default function NewTaskScreen() {
                             )}
                         </View>
                         <View style={[styles.underline, { backgroundColor: colors.border }]} />
-                        <Text style={{ fontSize: 10, color: currentWordCount === 12 ? '#EF4444' : colors.secondaryText, marginTop: 6, alignSelf: 'flex-end', fontWeight: 'bold' }}>
-                            {currentWordCount}/12 words
-                        </Text>
+                        {type === 'streak' && (
+                            <Text style={{ fontSize: 10, color: currentWordCount === 12 ? '#EF4444' : colors.secondaryText, marginTop: 6, alignSelf: 'flex-end', fontWeight: 'bold' }}>
+                                {currentWordCount}/12 words
+                            </Text>
+                        )}
                     </View>
 
                     {type === 'streak' && (
