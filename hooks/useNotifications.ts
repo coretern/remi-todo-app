@@ -6,8 +6,7 @@ import { Platform } from 'react-native';
 // Helper to get notifications instance safely
 const getNotifications = () => {
     try {
-        // SDK 53 Safety: expo-notifications causes crashes in Expo Go Android
-        if (Platform.OS === 'web' || Constants.appOwnership === 'expo') return null;
+        if (Platform.OS === 'web') return null;
         return require('expo-notifications');
     } catch (e) {
         return null;
@@ -69,31 +68,33 @@ export const useNotifications = () => {
         // Calculate trigger time
         const triggerDate = new Date(dueDate - (minutesBefore * 60 * 1000));
         
-        console.log(`[Reminder Logic] Mission: "${task}" alert scheduled for: ${triggerDate.toLocaleString()}`);
-        console.log(`[Reminder Logic] Offset: ${minutesBefore} minutes before mission due time.`);
+        if (triggerDate.getTime() <= Date.now()) {
+            if (Date.now() - triggerDate.getTime() < 60000) {
+                // If the user selected the absolute current minute but seconds slipped into the past, fire immediately.
+                triggerDate.setTime(Date.now() + 1500);
+            } else {
+                console.log('[Reminder Info] Native notification skipped - time is deep in the past.');
+                return null;
+            }
+        }
 
         const Notifications = getNotifications();
-        if (!Notifications || Platform.OS === 'web') {
-            console.log(`[Reminder Info] Native notification skipped (Running in Expo Go/Web). Logic is verified!`);
-            return 'expo_go_mock_id';
-        }
-        
-        if (triggerDate.getTime() <= Date.now()) return null;
+        if (!Notifications || Platform.OS === 'web') return 'expo_go_mock_id';
 
         try {
             const notificationId = await Notifications.scheduleNotificationAsync({
                 content: {
                     title: "Mission Alert ⏰",
                     body: minutesBefore > 0 
-                        ? `${task} starts in ${minutesBefore} minutes!` 
-                        : `Time for your mission: ${task}`,
+                        ? `${task.slice(0, 50)}${task.length > 50 ? '...' : ''} starts in ${minutesBefore} minutes!` 
+                        : `Time for your mission: ${task.slice(0, 50)}${task.length > 50 ? '...' : ''}`,
                     data: { id },
                     sound: true,
-                    vibrate: [0, 250, 250, 250],
+                    priority: Notifications.AndroidNotificationPriority.MAX,
                 },
                 trigger: {
                     type: Notifications.SchedulableTriggerInputTypes.DATE,
-                    date: triggerDate,
+                    date: triggerDate.getTime(),
                     channelId: 'default',
                 },
             });

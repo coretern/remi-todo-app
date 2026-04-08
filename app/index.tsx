@@ -136,7 +136,7 @@ export default function HomeScreen() {
     const handleShare = async () => {
         try {
             await Share.share({
-                message: `I've finished ${completedCount}/${count} missions on Remi Todo! Join me: https://play.google.com/store/apps/details?id=com.monitorweb.remitodo`,
+                message: `I've finished ${completedCount}/${count} missions on Remi Todo! Join me: https://play.google.com/store/apps/details?id=com.remi.todoapp`,
             });
         } catch (e) {
             console.error(e);

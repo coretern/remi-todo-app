@@ -43,22 +43,15 @@ export default function NewTaskScreen() {
             const finalTarget = customTarget ? parseInt(customTarget) : streakTarget;
             
             if (type === 'normal') {
-                const tasks = task.split('\n').filter(t => t.trim().length > 0);
-                for (const t of tasks) {
-                    // Remove leading numbers (1., 2., 1), etc.)
-                    const cleanTask = t.trim().replace(/^[0-9]+[\.\)]\s*/, '');
-                    if (cleanTask) {
-                        await addTodo(
-                            cleanTask, 
-                            'normal', 
-                            userName.trim() || 'Champion',
-                            undefined,
-                            icon,
-                            dueDate ? dueDate.getTime() : undefined, 
-                            finalOffset
-                        );
-                    }
-                }
+                await addTodo(
+                    task.trim(), 
+                    'normal', 
+                    userName.trim() || 'Champion',
+                    undefined,
+                    icon,
+                    dueDate ? dueDate.getTime() : undefined, 
+                    finalOffset
+                );
             } else {
                 await addTodo(
                     task.trim(), 
@@ -176,7 +169,7 @@ export default function NewTaskScreen() {
                         <View style={[styles.inputRow, type === 'normal' && { alignItems: 'flex-end' }]}>
                             <TextInput
                                 style={[styles.taskInput, { color: colors.text }, type === 'normal' && { minHeight: 80, textAlignVertical: 'top' }]}
-                                placeholder={type === 'streak' ? "e.g. Make a Reel daily" : "Enter Task Here\n(Tip: Press Enter to add numbering)"}
+                                placeholder={type === 'streak' ? "e.g. Make a Reel daily" : "Enter Task Here"}
                                 placeholderTextColor={colors.secondaryText}
                                 value={task}
                                 onChangeText={handleTaskChange}
