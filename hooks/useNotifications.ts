@@ -35,11 +35,16 @@ export const useNotifications = () => {
 
             // 2. Setup Android Channel
             if (Platform.OS === 'android') {
-                await Notifications.setNotificationChannelAsync('default', {
-                    name: 'default',
+                await Notifications.setNotificationChannelAsync('missions', {
+                    name: 'Mission Reminders',
                     importance: Notifications.AndroidImportance.MAX,
                     vibrationPattern: [0, 250, 250, 250],
                     lightColor: '#0a7ea4',
+                    lockscreenVisibility: Notifications.AndroidNotificationVisibility.PUBLIC,
+                    showBadge: true,
+                    enableVibrate: true,
+                    sound: 'default',
+                    bypassDnd: true,
                 });
             }
 
@@ -85,20 +90,26 @@ export const useNotifications = () => {
             const notificationId = await Notifications.scheduleNotificationAsync({
                 content: {
                     title: "Mission Alert ⏰",
-                    body: minutesBefore > 0 
+                    body: (minutesBefore > 0 
                         ? `${task.slice(0, 50)}${task.length > 50 ? '...' : ''} starts in ${minutesBefore} minutes!` 
-                        : `Time for your mission: ${task.slice(0, 50)}${task.length > 50 ? '...' : ''}`,
+                        : `Time for your mission: ${task.slice(0, 50)}${task.length > 50 ? '...' : ''}`).trim(),
                     data: { id },
-                    sound: true,
+                    sound: true, 
                     priority: Notifications.AndroidNotificationPriority.MAX,
+                    android: {
+                        channelId: 'missions',
+                        importance: Notifications.AndroidImportance.MAX,
+                        priority: 'max',
+                        vibrationPattern: [0, 250, 250, 250],
+                    }
                 },
                 trigger: {
                     type: Notifications.SchedulableTriggerInputTypes.DATE,
-                    date: triggerDate.getTime(),
-                    channelId: 'default',
+                    date: triggerDate.getTime(), 
+                    channelId: 'missions',
                 },
             });
-            console.log(`[Reminder Success] Native alert active with ID: ${notificationId}`);
+            console.log(`[Reminder Success] Mission alert scheduled for ${triggerDate.toISOString()} with ID: ${notificationId}`);
             return notificationId;
         } catch (e) {
             console.error('[Reminder Error] Failed to schedule notification', e);
@@ -124,6 +135,7 @@ export const useNotifications = () => {
                     shouldShowAlert: true,
                     shouldPlaySound: true,
                     shouldSetBadge: true,
+                    priority: Notifications.AndroidImportance.MAX,
                 }),
             });
             

@@ -286,7 +286,6 @@ const styles = StyleSheet.create({
         marginTop: 2,
         letterSpacing: 0.5,
         alignSelf: 'center',
-        marginLeft: 12
     },
     certButtons: {
         flexDirection: 'row',
