@@ -25,6 +25,10 @@ export default function AboutScreen() {
         Linking.openURL('https://docs.google.com/forms/d/e/1FAIpQLSeGLFa0DTPoalpk2FXGyYCQAuAB9UQOeDKewbBxo8Wb5w9VUw/viewform?usp=sf_link');
     };
 
+    const handleVideoTutorial = () => {
+        Linking.openURL('https://youtu.be/U74-wQrSOtc?si=Y0F4QGyOCEXLu8D1');
+    };
+
     return (
         <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
 
@@ -39,17 +43,26 @@ export default function AboutScreen() {
                     <Text style={[styles.appName, { color: colors.text }]}>Remi Todo</Text>
                     
                     <Text style={[styles.simpleDescription, { color: colors.text }]}>
-                        Remi Todo keeps your life organized. Easily backup your tasks to the cloud, sync with Google Calendar, and restore your history whenever you need.
+                        Remi Todo is a powerful, pro-level mission tracker. Master your habits, break down multi-line tasks, and hit your daily streaks to earn professional certificates.
                     </Text>
                 </View>
 
                 <View style={styles.featuresArea}>
-                    <FeatureItem icon="cloud-done-outline" text="Cloud backup for your tasks" colors={colors} />
-                    <FeatureItem icon="calendar-outline" text="Google Calendar sync" colors={colors} />
-                    <FeatureItem icon="sync-outline" text="Easy history restoration" colors={colors} />
+                    <FeatureItem icon="cloud-done-outline" text="Secure Cloud Data Sync" colors={colors} />
+                    <FeatureItem icon="notifications-outline" text="Precise Offline Reminders" colors={colors} />
+                    <FeatureItem icon="ribbon-outline" text="Downloadable Certificates" colors={colors} />
+                    <FeatureItem icon="list-outline" text="Multi-line Mission Tracking" colors={colors} />
                 </View>
 
                 <View style={styles.actionSection}>
+                    <TouchableOpacity 
+                        style={[styles.actionRow, { borderTopColor: colors.border }]}
+                        onPress={handleVideoTutorial}
+                    >
+                        <Ionicons name="play-circle-outline" size={22} color={colors.header} />
+                        <Text style={[styles.actionLabel, { color: colors.text }]}>How to use Remi Todo App</Text>
+                    </TouchableOpacity>
+
                     <TouchableOpacity 
                         style={[styles.actionRow, { borderTopColor: colors.border }]}
                         onPress={handleContactEmail}

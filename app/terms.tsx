@@ -23,18 +23,18 @@ export default function TermsScreen() {
                 <View style={styles.contentHeader}>
                     <Ionicons name="document-text-outline" size={48} color={colors.header} />
                     <Text style={[styles.mainTitle, { color: colors.text }]}>Terms of Service</Text>
-                    <Text style={[styles.lastUpdated, { color: colors.secondaryText }]}>LAST UPDATED: MARCH 31, 2026</Text>
+                    <Text style={[styles.lastUpdated, { color: colors.secondaryText }]}>LAST UPDATED: APRIL 8, 2026</Text>
                 </View>
 
                 <View style={styles.entryContainer}>
                     <TermEntry 
                         title="1. Cloud Syncing" 
-                        text="When you sign in with Google, you agree to allow Remi to safely back up your missions to the cloud and your Google Calendar." 
+                        text="When you sign in with Google, you agree to allow Remi to safely back up your missions and daily streaks to the cloud for seamless restoration." 
                         colors={colors}
                     />
                     <TermEntry 
-                        title="2. Data Control" 
-                        text="You own your missions. You can delete them from your phone or the cloud at any time." 
+                        title="2. Mission Integrity" 
+                        text="You are fully responsible for your streaks. If a mission expires or is missed, your streak will reset to maintain the integrity of the professional achievement certificates." 
                         colors={colors}
                     />
                     <TermEntry 

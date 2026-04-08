@@ -23,7 +23,7 @@ export default function PrivacyScreen() {
                 <View style={styles.contentHeader}>
                     <Ionicons name="shield-checkmark-outline" size={48} color={colors.header} />
                     <Text style={[styles.mainTitle, { color: colors.text }]}>Privacy Policy</Text>
-                    <Text style={[styles.lastUpdated, { color: colors.secondaryText }]}>LAST UPDATED: MARCH 31, 2026</Text>
+                    <Text style={[styles.lastUpdated, { color: colors.secondaryText }]}>LAST UPDATED: APRIL 8, 2026</Text>
                 </View>
 
                 <View style={styles.entryContainer}>
@@ -38,7 +38,17 @@ export default function PrivacyScreen() {
                         colors={colors}
                     />
                     <PolicyEntry 
-                        title="3. Improvements" 
+                        title="3. Device Gallery" 
+                        text="When you download a Mission Certificate, the app requests permission to save the image directly to your local photo gallery. We do not access or read your other photos." 
+                        colors={colors}
+                    />
+                    <PolicyEntry 
+                        title="4. Local Notifications" 
+                        text="Remi Todo sets exact background alarms on your device to ensure you never miss a mission. These alerts are processed entirely offline." 
+                        colors={colors}
+                    />
+                    <PolicyEntry 
+                        title="5. Improvements" 
                         text="We use Google Analytics to understand how users use the app so we can make it better for you." 
                         colors={colors}
                     />
