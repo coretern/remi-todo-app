@@ -27,9 +27,6 @@ export function TodoProvider({ children }: { children: React.ReactNode }) {
     const [isLoading, setIsLoading] = useState(true);
     const { scheduleTodoReminder, cancelReminder } = useNotifications();
 
-    // Helper: ISO Date for daily tracking
-    const getTodayISO = () => new Date().toISOString().split('T')[0];
-
     // The heart of the cloud sync: Pulls data from Firebase and merges it with local data
     const syncWithCloud = useCallback(async () => {
         const email = await AsyncStorage.getItem('sync_email');
@@ -59,6 +56,12 @@ export function TodoProvider({ children }: { children: React.ReactNode }) {
         }
     }, []);
 
+    // Helper: Local ISO Date (YYYY-MM-DD) for timezone-accurate tracking 🌍
+    const getTodayISO = () => {
+        const d = new Date();
+        return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    };
+
     // Listen for login/sync changes to trigger cloud recovery
     useEffect(() => {
         const checkSyncStatus = async () => {
@@ -81,17 +84,28 @@ export function TodoProvider({ children }: { children: React.ReactNode }) {
                     let loadedTodos: Todo[] = JSON.parse(jsonValue);
                     const today = getTodayISO();
 
-                    // BROKEN STREAK LOGIC: Detect missed days during load 🤖
+                    // 🤖 AUTOMATIC STREAK BREAKER: Check for missed days
                     loadedTodos = loadedTodos.map(todo => {
                         if (todo.type === 'streak' && !todo.completed && !todo.isBroken) {
-                            const lastDate = todo.lastCompletedDate;
-                            if (lastDate) {
-                                const diffTime = Math.abs(new Date(today).getTime() - new Date(lastDate).getTime());
-                                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                            // Use lastCompletedDate if available, otherwise use createdAt
+                            const referenceDate = todo.lastCompletedDate || 
+                                new Date(todo.createdAt || Date.now()).toISOString().split('T')[0];
+                            
+                            if (referenceDate) {
+                                const refTime = new Date(referenceDate).getTime();
+                                const nowTime = new Date(today).getTime();
+                                const diffDays = (nowTime - refTime) / (1000 * 60 * 60 * 24);
                                 
-                                // Reset logic: If more than 1 day has passed without a tick
+                                // BREAK CONDITION: If more than 1 full calendar day has passed since last tick
+                                // Example: Last tick 12th, Today 14th -> diffDays is 2 -> BREAK!
                                 if (diffDays > 1) {
-                                    return { ...todo, isBroken: true, completed: true, completedAt: Date.now() };
+                                    return { 
+                                        ...todo, 
+                                        isBroken: true, 
+                                        completed: true, 
+                                        completedAt: Date.now(),
+                                        isArchived: false // Keep on main list for a day to show it's broken
+                                    };
                                 }
                             }
                         }
@@ -171,9 +185,21 @@ export function TodoProvider({ children }: { children: React.ReactNode }) {
             const today = getTodayISO();
             const updated = prev.map(todo => {
                 if (todo.id === id) {
-                    // STREAK LOGIC: No Undo if Completed or Broken 🔒
+                    // RESTORE/UNDO LOGIC: If it's already completed or archived, always allow undoing it!
+                    if (todo.completed || todo.isArchived) {
+                        return { 
+                            ...todo, 
+                            completed: false, 
+                            completedAt: undefined, 
+                            isArchived: false,
+                            isBroken: false,
+                            // If it's a streak, keep the current streak count but allow continuing
+                            lastCompletedDate: undefined 
+                        };
+                    }
+
+                    // STREAK TICKING LOGIC: No Undo if Locked today
                     if (todo.type === 'streak') {
-                        if (todo.completed || todo.isBroken) return todo;
                         if (todo.lastCompletedDate === today) return todo; // Locked today
                         
                         const newStreak = (todo.currentStreak || 0) + 1;
@@ -188,21 +214,17 @@ export function TodoProvider({ children }: { children: React.ReactNode }) {
                         };
                     }
 
-                    // NORMAL TASK LOGIC: Can toggle freely
+                    // NORMAL TASK LOGIC: Simple toggle
                     const now = Date.now();
-                    if (!todo.completed) {
-                        if (todo.reminderId) cancelReminder(todo.reminderId);
-                        return { ...todo, completed: true, completedAt: now, reminderId: undefined };
-                    } else {
-                        return { ...todo, completed: false, completedAt: undefined, isArchived: false };
-                    }
+                    if (todo.reminderId) cancelReminder(todo.reminderId);
+                    return { ...todo, completed: true, completedAt: now, reminderId: undefined };
                 }
                 return todo;
             });
             SyncService.backupToCloud(updated);
             return updated;
         });
-    }, [cancelReminder]);
+    }, [cancelReminder, getTodayISO]);
 
     const pinTodo = useCallback((id: string) => {
         setTodos(prev => {
@@ -292,10 +314,12 @@ export function TodoProvider({ children }: { children: React.ReactNode }) {
 
         const updateWidget = async () => {
             try {
-                // Using dynamic import to avoid issues on non-android platforms
                 const { requestWidgetUpdate } = require('react-native-android-widget');
+                const { TodoWidget } = require('../widget/TodoWidget');
+                
                 requestWidgetUpdate({
                     widgetName: 'TodoWidget',
+                    renderWidget: () => <TodoWidget todos={todos} />
                 });
             } catch (e) {
                 // Widget might not be configured or platform not supported

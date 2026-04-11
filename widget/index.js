@@ -13,14 +13,17 @@ async function getTodos() {
   }
 }
 
-export function widgetTaskHandler(props) {
+export async function widgetTaskHandler(props) {
   switch (props.widgetAction) {
     case 'WIDGET_ADDED':
     case 'WIDGET_UPDATE':
     case 'WIDGET_RESIZED':
-      getTodos().then(todos => {
+      try {
+        const todos = await getTodos();
         props.renderWidget(<TodoWidget todos={todos} />);
-      });
+      } catch (e) {
+        props.renderWidget(<TodoWidget todos={[]} />);
+      }
       break;
 
     case 'OPEN_APP':
@@ -29,7 +32,6 @@ export function widgetTaskHandler(props) {
 
     case 'ADD_TASK':
       props.clickActionProps.openApp({
-        // Deep link to new-task screen
         uri: 'remi-todo:///new-task'
       });
       break;

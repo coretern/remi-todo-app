@@ -16,7 +16,8 @@ interface TodoItemProps {
 
 const TodoItem: React.FC<TodoItemProps> = ({ todo, onToggle, onDelete, onPin, onShowCert }) => {
     const { colors, theme, timeFormat } = useTheme();
-    const today = new Date().toISOString().split('T')[0];
+    const d = new Date();
+    const today = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
     
     // Check if streak is locked for today
     const isLocked = todo.type === 'streak' && todo.lastCompletedDate === today;
@@ -135,6 +136,14 @@ const TodoItem: React.FC<TodoItemProps> = ({ todo, onToggle, onDelete, onPin, on
             </View>
 
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                {todo.completed && (
+                    <TouchableOpacity 
+                        onPress={() => onToggle(todo.id)} 
+                        style={{ padding: 8, marginRight: 4 }}
+                    >
+                        <Ionicons name="refresh-outline" size={18} color={colors.secondaryText} />
+                    </TouchableOpacity>
+                )}
                 {onShowCert && todo.type === 'streak' && todo.completed && !todo.isBroken && (
                     <TouchableOpacity onPress={() => onShowCert(todo)} style={{ padding: 8 }}>
                         <Ionicons name="ribbon" size={20} color="#FFD700" />

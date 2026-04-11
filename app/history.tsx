@@ -254,14 +254,12 @@ export default function HistoryScreen() {
                                 </TouchableOpacity>
                             )}
 
-                            {item.type === 'normal' && (
-                                <TouchableOpacity 
-                                    onPress={() => { toggleTodo(item.id); router.back(); }} 
-                                    style={styles.actionBtn}
-                                >
-                                    <Ionicons name="refresh-outline" size={18} color={colors.secondaryText} />
-                                </TouchableOpacity>
-                            )}
+                            <TouchableOpacity 
+                                onPress={() => { toggleTodo(item.id); router.back(); }} 
+                                style={styles.actionBtn}
+                            >
+                                <Ionicons name="refresh-outline" size={18} color={colors.secondaryText} />
+                            </TouchableOpacity>
                             <TouchableOpacity onPress={() => handleDeleteItem(item)} style={styles.actionBtn}>
                                 <Ionicons name="trash-outline" size={18} color={colors.secondaryText} />
                             </TouchableOpacity>
