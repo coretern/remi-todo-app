@@ -86,9 +86,24 @@
           }
         }
       ],
-      "@react-native-community/datetimepicker",
-      "expo-font",
-      "expo-image"
+      [
+        "react-native-android-widget",
+        {
+          "widgets": [
+            {
+              "name": "TodoWidget",
+              "label": "Remi Todo Tasks",
+              "description": "Check your active missions at a glance",
+              "src": "./widget/index.js",
+              "targetId": "todo_widget",
+              "previewImage": "./assets/images/remiicon.png",
+              "minWidth": "180dp",
+              "minHeight": "110dp",
+              "updatePeriodMillis": 3600000
+            }
+          ]
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,

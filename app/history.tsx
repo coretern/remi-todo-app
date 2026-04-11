@@ -3,9 +3,10 @@ import { Stack, useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import {
     Alert,
-    FlatList,
+    SectionList,
     SafeAreaView,
     StyleSheet,
+    Platform,
     Text,
     TouchableOpacity,
     View,
@@ -21,7 +22,67 @@ export default function HistoryScreen() {
     const { todos, toggleTodo, deleteTodo, clearCompleted, completedCount } = useTodos();
 
     const [selectedCert, setSelectedCert] = useState<any>(null);
-    const completedMissions = todos.filter(t => t.completed || t.isBroken);
+    const [filter, setFilter] = useState<'All' | 'Streak' | 'Normal'>('All');
+    
+    const formatDateHeader = (timestamp: number) => {
+        const date = new Date(timestamp);
+        const today = new Date();
+        const yesterday = new Date();
+        yesterday.setDate(today.getDate() - 1);
+
+        if (date.toDateString() === today.toDateString()) return 'TODAY';
+        if (date.toDateString() === yesterday.toDateString()) return 'YESTERDAY';
+
+        return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'long' }).toUpperCase();
+    };
+
+    // Sort archived missions by completion date (newest first)
+    const archivedMissions = todos
+        .filter(t => t.isArchived)
+        .sort((a, b) => (b.completedAt || 0) - (a.completedAt || 0));
+    
+    // Grouping Logic for Sections
+    let sections: any[] = [];
+    
+    if (filter === 'Streak') {
+        sections = [{
+            title: 'STREAK REWARDS',
+            data: archivedMissions.filter(t => t.type === 'streak'),
+            icon: 'flame' as const,
+        }];
+    } else if (filter === 'Normal') {
+        const normalMissions = archivedMissions.filter(t => t.type === 'normal');
+        const groups = normalMissions.reduce((acc: any, todo) => {
+            const dateStr = formatDateHeader(todo.completedAt || Date.now());
+            if (!acc[dateStr]) acc[dateStr] = [];
+            acc[dateStr].push(todo);
+            return acc;
+        }, {});
+
+        sections = Object.keys(groups).map(dateTitle => ({
+            title: dateTitle,
+            data: groups[dateTitle],
+            icon: 'calendar-outline' as const,
+        }));
+    } else {
+        // ALL MODE: Group everything by date
+        const groups = archivedMissions.reduce((acc: any, todo) => {
+            const dateStr = formatDateHeader(todo.completedAt || Date.now());
+            if (!acc[dateStr]) acc[dateStr] = [];
+            acc[dateStr].push(todo);
+            return acc;
+        }, {});
+
+        sections = Object.keys(groups).map(dateTitle => ({
+            title: dateTitle,
+            data: groups[dateTitle],
+            icon: 'documents-outline' as const,
+        }));
+    }
+
+    sections = sections.filter(section => section.data.length > 0);
+
+    const totalCount = archivedMissions.length;
 
     const confirmClearHistoryPhase2 = () => {
         Alert.alert(
@@ -35,6 +96,13 @@ export default function HistoryScreen() {
     };
 
     const handleClearHistory = () => {
+        if (Platform.OS === 'web') {
+            if (window.confirm("Are you sure you want to delete ALL completed missions forever? This cannot be undone.")) {
+                clearCompleted();
+            }
+            return;
+        }
+
         Alert.alert(
             "Clear History",
             "Are you sure you want to delete all completed missions forever?",
@@ -57,6 +125,13 @@ export default function HistoryScreen() {
     };
 
     const handleDeleteItem = (item: any) => {
+        if (Platform.OS === 'web') {
+            if (window.confirm(`Are you sure you want to delete "${item.task}"?`)) {
+                deleteTodo(item.id);
+            }
+            return;
+        }
+
         if (item.type === 'streak') {
             Alert.alert(
                 "Delete Streak",
@@ -75,37 +150,69 @@ export default function HistoryScreen() {
         <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
             <Stack.Screen options={{
                 title: 'Mission History',
-                headerRight: () => completedMissions.length > 0 ? (
+                headerRight: () => totalCount > 0 ? (
                     <TouchableOpacity onPress={handleClearHistory} style={styles.headerAction}>
                         <Ionicons name="trash-outline" size={22} color="white" />
                     </TouchableOpacity>
                 ) : null,
             }} />
 
-            <FlatList
-                data={completedMissions}
+            <SectionList
+                sections={sections}
                 keyExtractor={(item) => item.id}
                 contentContainerStyle={styles.listContent}
                 showsVerticalScrollIndicator={false}
+                stickySectionHeadersEnabled={false}
                 ListHeaderComponent={
-                    <View style={styles.header}>
-                        <Text style={[styles.title, { color: colors.text }]}>Record of Glory</Text>
-                        <Text style={[styles.subtitle, { color: colors.secondaryText }]}>{completedCount} Missions Accomplished</Text>
+                    <View>
+                        <View style={styles.header}>
+                            <Text style={[styles.title, { color: colors.text }]}>Record of Glory</Text>
+                            <Text style={[styles.subtitle, { color: colors.secondaryText }]}>{totalCount} Missions Archived</Text>
+                        </View>
+                        
+                        <View style={styles.filterContainer}>
+                            {(['All', 'Streak', 'Normal'] as const).map((mode) => (
+                                <TouchableOpacity 
+                                    key={mode}
+                                    style={[
+                                        styles.filterTab, 
+                                        filter === mode && { backgroundColor: colors.header }
+                                    ]} 
+                                    onPress={() => setFilter(mode)}
+                                >
+                                    <Text style={[
+                                        styles.filterText, 
+                                        { color: filter === mode ? 'white' : colors.secondaryText }
+                                    ]}>
+                                        {mode === 'All' ? 'All Missions' : mode === 'Streak' ? 'Streaks' : 'Normal'}
+                                    </Text>
+                                </TouchableOpacity>
+                            ))}
+                        </View>
                     </View>
                 }
                 ListEmptyComponent={
                     <View style={styles.emptyContainer}>
                         <Ionicons name="documents-outline" size={60} color={colors.border} />
-                        <Text style={[styles.emptyText, { color: colors.secondaryText }]}>No history yet.</Text>
+                        <Text style={[styles.emptyText, { color: colors.secondaryText }]}>No missions found in this category.</Text>
                     </View>
                 }
+                renderSectionHeader={({ section }) => (
+                    <View style={[styles.sectionHeader, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
+                        <Ionicons name={section.icon} size={16} color={colors.header} style={{ marginRight: 8 }} />
+                        <Text style={[styles.sectionHeaderText, { color: colors.header }]}>{section.title}</Text>
+                        <View style={[styles.sectionBadge, { backgroundColor: colors.header }]}>
+                            <Text style={styles.sectionBadgeText}>{section.data.length}</Text>
+                        </View>
+                    </View>
+                )}
                 renderItem={({ item }) => (
                     <View style={[styles.item, { borderBottomColor: colors.border, opacity: item.isBroken ? 0.7 : 1 }]}>
                         <View style={styles.itemMain}>
                             <Ionicons 
-                                name={item.isBroken ? "flame-outline" : "checkmark-circle-outline"} 
+                                name={item.isBroken ? "alert-circle-outline" : item.type === 'streak' ? "flame" : "checkmark-circle"} 
                                 size={22} 
-                                color={item.isBroken ? "#EF4444" : colors.header} 
+                                color={item.isBroken ? "#EF4444" : item.type === 'streak' ? "#FF7A00" : colors.header} 
                             />
                             <View style={styles.textContainer}>
                                 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
@@ -125,13 +232,13 @@ export default function HistoryScreen() {
                                     </Text>
                                 </View>
                                 
-                                <Text style={[styles.statusText, { color: item.isBroken ? "#EF4444" : colors.header }]}>
-                                    {item.isBroken ? "STREAK BROKEN" : item.type === 'streak' ? "STREAK COMPLETED" : "MISSION DONE"}
+                                <Text style={[styles.statusText, { color: item.isBroken ? "#EF4444" : item.type === 'streak' ? "#FF7A00" : colors.header }]}>
+                                    {item.isBroken ? "STREAK BROKEN" : item.type === 'streak' ? `COMPLETED • ${item.streakTarget} DAYS` : "MISSION DONE"}
                                 </Text>
 
                                 <Text style={[styles.dateText, { color: colors.secondaryText }]}>
                                     {item.type === 'streak' 
-                                        ? `Timeline: ${new Date(item.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })} — ${new Date(item.completedAt || Date.now()).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}`
+                                        ? `Period: ${new Date(item.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })} — ${new Date(item.completedAt || Date.now()).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}`
                                         : `Completed: ${new Date(item.completedAt || Date.now()).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })} at ${new Date(item.completedAt || Date.now()).toLocaleTimeString(timeFormat === '12h' ? 'en-US' : 'en-GB', { hour: 'numeric', minute: '2-digit', hour12: timeFormat === '12h' })}`
                                     }
                                 </Text>
@@ -196,5 +303,48 @@ const styles = StyleSheet.create({
     actions: { flexDirection: 'row', alignItems: 'center' },
     actionBtn: { padding: 8 },
     emptyContainer: { alignItems: 'center', marginTop: 120 },
-    emptyText: { fontSize: 16, fontWeight: '700', marginTop: 20, opacity: 0.5 }
+    emptyText: { fontSize: 16, fontWeight: '700', marginTop: 20, opacity: 0.5 },
+    filterContainer: {
+        flexDirection: 'row',
+        paddingHorizontal: 25,
+        paddingBottom: 25,
+        marginTop: -10,
+    },
+    filterTab: {
+        paddingHorizontal: 16,
+        paddingVertical: 8,
+        borderRadius: 20,
+        marginRight: 10,
+        backgroundColor: 'transparent',
+        borderWidth: 1,
+        borderColor: 'rgba(0,0,0,0.05)',
+    },
+    filterText: {
+        fontSize: 13,
+        fontWeight: '700',
+    },
+    sectionHeader: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingVertical: 12,
+        paddingHorizontal: 25,
+        borderBottomWidth: 1,
+        marginTop: 10,
+    },
+    sectionHeaderText: {
+        fontSize: 12,
+        fontWeight: '900',
+        letterSpacing: 2,
+    },
+    sectionBadge: {
+        marginLeft: 'auto',
+        paddingHorizontal: 8,
+        paddingVertical: 2,
+        borderRadius: 10,
+    },
+    sectionBadgeText: {
+        color: 'white',
+        fontSize: 10,
+        fontWeight: '900',
+    },
 });

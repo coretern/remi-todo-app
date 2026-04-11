@@ -17,6 +17,7 @@ export interface Todo {
     isBroken?: boolean;        // Moved to History: Streak Failed
     isPinned?: boolean;        // Master feature: Top of Home
     icon?: 'youtube' | 'instagram' | 'study' | 'default';
+    isArchived?: boolean;      // Moved to History
 }
 
 export type TodoAction =

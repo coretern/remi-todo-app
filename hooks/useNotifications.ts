@@ -16,13 +16,22 @@ const getNotifications = () => {
 export const useNotifications = () => {
     const [expoPushToken, setExpoPushToken] = useState('');
 
-    const registerForPushNotificationsAsync = useCallback(async () => {
+    const setupNotificationsAsync = useCallback(async () => {
         const Notifications = getNotifications();
         if (!Notifications || Platform.OS === 'web') return;
 
-        let token;
         try {
-            // 1. Check Permissions
+            // 1. Initial Configuration (Must be done early)
+            Notifications.setNotificationHandler({
+                handleNotification: async () => ({
+                    shouldShowAlert: true,
+                    shouldPlaySound: true,
+                    shouldSetBadge: true,
+                    priority: Notifications.AndroidImportance.MAX,
+                }),
+            });
+
+            // 2. Check & Request Permissions
             const { status: existingStatus } = await Notifications.getPermissionsAsync();
             let finalStatus = existingStatus;
 
@@ -31,9 +40,21 @@ export const useNotifications = () => {
                 finalStatus = status;
             }
 
-            if (finalStatus !== 'granted') return;
+            if (finalStatus !== 'granted') {
+                console.log('[Notification Warning] Permission not granted');
+                return;
+            }
 
-            // 2. Setup Android Channel
+            // 2.5 Check Exact Alarm permission for Android 12+
+            if (Platform.OS === 'android') {
+                const { canScheduleExactAlarms } = await Notifications.getPermissionsAsync();
+                if (!canScheduleExactAlarms) {
+                    console.log('[Notification Warning] Exact Alarms not permitted - timing may be imprecise.');
+                    // Optionally we could request this, but it requires a specific intent on most devices
+                }
+            }
+
+            // 3. Setup Android Channel (Vital for Android 8+)
             if (Platform.OS === 'android') {
                 await Notifications.setNotificationChannelAsync('missions', {
                     name: 'Mission Reminders',
@@ -48,74 +69,86 @@ export const useNotifications = () => {
                 });
             }
 
-            // 3. Expo SDK 53+ Safety: Skip push token in Expo Go / Development
-            const isExpoGo = Constants.executionEnvironment === 'storeClient';
+            // 4. Setup Categories for Actions
+            await Notifications.setNotificationCategoryAsync('mission_actions', [
+                {
+                    identifier: 'COMPLETE',
+                    buttonTitle: 'COMPLETE',
+                    options: { isDestructive: false },
+                },
+                {
+                    identifier: 'TRASH',
+                    buttonTitle: 'TRASH',
+                    options: { isDestructive: true },
+                },
+            ]);
 
+            // 5. Token logic (Only for standalone builds)
+            const isExpoGo = Constants.executionEnvironment === 'storeClient';
             if (Device.isDevice && !isExpoGo) {
                 try {
-                    const tokenData = await Notifications.getExpoPushTokenAsync();
-                    token = tokenData.data;
+                    const tokenData = await Notifications.getExpoPushTokenAsync({
+                        projectId: Constants.expoConfig?.extra?.eas?.projectId,
+                    });
+                    setExpoPushToken(tokenData.data);
                 } catch (e) {
-                    console.log('Push token not supported/configured for this build');
+                    console.log('Push token skip');
                 }
-            } else {
-                console.log('Local-only notifications mode (Expo Go/Dev)');
             }
 
         } catch (error) {
-            console.log('Notification setup skipped:', error);
+            console.log('Notification setup Error:', error);
         }
-
-        return token;
     }, []);
 
     const scheduleTodoReminder = useCallback(async (id: string, task: string, dueDate: number, minutesBefore: number = 0) => {
-        // Calculate trigger time
-        const triggerDate = new Date(dueDate - (minutesBefore * 60 * 1000));
+        const Notifications = getNotifications();
+        if (!Notifications || Platform.OS === 'web') return null;
+
+        // Ensure setup is done (in case it's the first run)
+        await setupNotificationsAsync();
+
+        const triggerTime = dueDate - (minutesBefore * 60 * 1000);
+        const triggerDate = new Date(triggerTime);
         
         if (triggerDate.getTime() <= Date.now()) {
-            if (Date.now() - triggerDate.getTime() < 60000) {
-                // If the user selected the absolute current minute but seconds slipped into the past, fire immediately.
-                triggerDate.setTime(Date.now() + 1500);
+            if (Date.now() - triggerDate.getTime() < 10000) {
+                triggerDate.setTime(Date.now() + 5000);
             } else {
-                console.log('[Reminder Info] Native notification skipped - time is deep in the past.');
                 return null;
             }
         }
-
-        const Notifications = getNotifications();
-        if (!Notifications || Platform.OS === 'web') return 'expo_go_mock_id';
 
         try {
             const notificationId = await Notifications.scheduleNotificationAsync({
                 content: {
                     title: "Mission Alert ⏰",
                     body: (minutesBefore > 0 
-                        ? `${task.slice(0, 50)}${task.length > 50 ? '...' : ''} starts in ${minutesBefore} minutes!` 
-                        : `Time for your mission: ${task.slice(0, 50)}${task.length > 50 ? '...' : ''}`).trim(),
+                        ? `${task.slice(0, 50)} starts in ${minutesBefore}m!` 
+                        : `Time for your mission: ${task.slice(0, 50)}`).trim(),
                     data: { id },
-                    sound: true, 
+                    sound: 'default', 
                     priority: Notifications.AndroidNotificationPriority.MAX,
+                    categoryIdentifier: 'mission_actions',
+                    color: '#0a7ea4',
                     android: {
                         channelId: 'missions',
                         importance: Notifications.AndroidImportance.MAX,
                         priority: 'max',
-                        vibrationPattern: [0, 250, 250, 250],
+                        visibility: 'public',
                     }
                 },
                 trigger: {
                     type: Notifications.SchedulableTriggerInputTypes.DATE,
-                    date: triggerDate.getTime(), 
-                    channelId: 'missions',
+                    date: triggerDate,
                 },
             });
-            console.log(`[Reminder Success] Mission alert scheduled for ${triggerDate.toISOString()} with ID: ${notificationId}`);
             return notificationId;
         } catch (e) {
-            console.error('[Reminder Error] Failed to schedule notification', e);
+            console.error('[Reminder Error]', e);
             return null;
         }
-    }, []);
+    }, [setupNotificationsAsync]);
 
     const cancelReminder = useCallback(async (id: string) => {
         const Notifications = getNotifications();
@@ -123,30 +156,13 @@ export const useNotifications = () => {
         try {
             await Notifications.cancelScheduledNotificationAsync(id);
         } catch (e) {
-            console.log('Failed to cancel notification', e);
+            console.log('Cancel Error', e);
         }
     }, []);
 
     useEffect(() => {
-        const Notifications = getNotifications();
-        if (Notifications) {
-            Notifications.setNotificationHandler({
-                handleNotification: async () => ({
-                    shouldShowAlert: true,
-                    shouldPlaySound: true,
-                    shouldSetBadge: true,
-                    priority: Notifications.AndroidImportance.MAX,
-                }),
-            });
-            
-            registerForPushNotificationsAsync().then(token => {
-                if (token) setExpoPushToken(token);
-            }).catch(err => {
-                // Silently catch and log for debug, but don't crash the app
-                console.log('Push notification registration skipped (normal for Expo Go)');
-            });
-        }
-    }, [registerForPushNotificationsAsync]);
+        setupNotificationsAsync();
+    }, [setupNotificationsAsync]);
 
     return {
         scheduleTodoReminder,

@@ -9,47 +9,37 @@ import { Ionicons } from '@expo/vector-icons';
 import Constants from 'expo-constants';
 
 import { TodoProvider } from '../context/TodoContext';
+import { useNotifications } from '../hooks/useNotifications';
 
 // Keep the splash screen visible while we fetch resources
 SplashScreen.preventAutoHideAsync().catch(() => { });
 
-// Safety wrapper to avoid crashes on Expo Go SDK 53
-const initNotifications = async () => {
-    if (Platform.OS === 'web' || Constants.appOwnership === 'expo') return;
-    
-    try {
-        // Dynamic require to prevent top-level import side effects
-        const Notifications = require('expo-notifications');
-        const { status: existingStatus } = await Notifications.getPermissionsAsync();
-        let finalStatus = existingStatus;
-        if (existingStatus !== 'granted') {
-            const { status } = await Notifications.requestPermissionsAsync();
-            finalStatus = status;
-        }
-        console.log('Push status:', finalStatus);
-    } catch (e) {
-        console.warn('Notifications init failed:', e);
-    }
-};
-
 export default function RootLayout() {
+    return (
+        <SafeAreaProvider>
+            <TodoProvider>
+                <ThemeProvider>
+                    <PermissionInitializer>
+                        <StatusBar barStyle="light-content" backgroundColor="transparent" translucent={true} />
+                        <RootLayoutContent />
+                    </PermissionInitializer>
+                </ThemeProvider>
+            </TodoProvider>
+        </SafeAreaProvider>
+    );
+}
+
+function PermissionInitializer({ children }: { children: React.ReactNode }) {
+    // This empty usage of useNotifications is enough to trigger its internal useEffect setup
+    useNotifications();
+    
     useEffect(() => {
-        initNotifications();
         setTimeout(async () => {
             await SplashScreen.hideAsync().catch(() => { });
         }, 300);
     }, []);
 
-    return (
-        <SafeAreaProvider>
-            <StatusBar barStyle="light-content" backgroundColor="transparent" translucent={true} />
-            <TodoProvider>
-                <ThemeProvider>
-                    <RootLayoutContent />
-                </ThemeProvider>
-            </TodoProvider>
-        </SafeAreaProvider>
-    );
+    return <>{children}</>;
 }
 
 function RootLayoutContent() {

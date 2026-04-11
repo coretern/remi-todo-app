@@ -14,7 +14,8 @@ import {
     TouchableOpacity,
     View,
     LayoutAnimation,
-    Image
+    Image,
+    Switch
 } from 'react-native';
 import { useTodos } from '../hooks/useTodos';
 import { useTheme } from '../context/ThemeContext';
@@ -36,11 +37,18 @@ export default function NewTaskScreen() {
     const [dueDate, setDueDate] = useState<Date | null>(null);
     const [reminderOffset, setReminderOffset] = useState<number | undefined>(undefined);
     const [customOffset, setCustomOffset] = useState('');
+    const [reminderEnabled, setReminderEnabled] = useState(false);
 
     const handleSave = async () => {
         if (task.trim()) {
             const finalOffset = customOffset ? parseInt(customOffset) : reminderOffset;
             const finalTarget = customTarget ? parseInt(customTarget) : streakTarget;
+            
+            // Notification logic: If enabled and no date, default 10min. If disabled, undefined.
+            let finalDueDate: number | undefined = undefined;
+            if (reminderEnabled) {
+                finalDueDate = dueDate ? dueDate.getTime() : (Date.now() + 10 * 60 * 1000);
+            }
             
             if (type === 'normal') {
                 await addTodo(
@@ -49,7 +57,7 @@ export default function NewTaskScreen() {
                     userName.trim() || 'Champion',
                     undefined,
                     icon,
-                    dueDate ? dueDate.getTime() : undefined, 
+                    finalDueDate, 
                     finalOffset
                 );
             } else {
@@ -59,7 +67,7 @@ export default function NewTaskScreen() {
                     userName.trim() || 'Champion',
                     finalTarget,
                     icon,
-                    dueDate ? dueDate.getTime() : undefined, 
+                    finalDueDate, 
                     finalOffset
                 );
             }
@@ -250,29 +258,51 @@ export default function NewTaskScreen() {
                     )}
 
                     <View style={styles.section}>
-                        <Text style={[styles.sectionLabel, { color: colors.header }]}>Optional Due date & Reminder</Text>
-                        <TouchableOpacity style={styles.pickerRow} onPress={() => setShowDatePicker(true)}>
-                            <Text style={[styles.pickerText, { color: colors.text }, !dueDate && { color: colors.secondaryText }]}>
-                                {dueDate ? formatDate(dueDate) : 'Never (Manual)'}
-                            </Text>
-                            <Ionicons name="calendar-outline" size={22} color={colors.header} />
-                            {dueDate && (
-                                <TouchableOpacity onPress={() => { setDueDate(null); setReminderOffset(undefined); }} style={styles.clearBtn}>
-                                    <Ionicons name="close-circle" size={20} color={colors.secondaryText} />
-                                </TouchableOpacity>
-                            )}
-                        </TouchableOpacity>
-                        <View style={[styles.underline, { backgroundColor: colors.border }]} />
+                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+                            <Text style={[styles.sectionLabel, { color: colors.header, marginBottom: 0 }]}>Due date & Reminder</Text>
+                            <Switch
+                                value={reminderEnabled}
+                                onValueChange={(val) => {
+                                    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+                                    setReminderEnabled(val);
+                                }}
+                                trackColor={{ false: '#767577', true: colors.header }}
+                                thumbColor={reminderEnabled ? '#fff' : '#f4f3f4'}
+                            />
+                        </View>
 
-                        {dueDate && (
-                            <>
-                                <TouchableOpacity style={styles.pickerRow} onPress={() => setShowTimePicker(true)}>
-                                    <Text style={[styles.pickerText, { color: colors.text }]}>{formatTime(dueDate)}</Text>
-                                    <Ionicons name="time-outline" size={22} color={colors.header} />
-                                </TouchableOpacity>
-                                <View style={[styles.underline, { backgroundColor: colors.border }]} />
-                            </>
-                        )}
+                        <View style={{ opacity: reminderEnabled ? 1 : 0.35 }}>
+                            <TouchableOpacity 
+                                style={styles.pickerRow} 
+                                onPress={() => reminderEnabled && setShowDatePicker(true)}
+                                disabled={!reminderEnabled}
+                            >
+                                <Text style={[styles.pickerText, { color: colors.text }, !dueDate && { color: colors.secondaryText }]}>
+                                    {dueDate ? formatDate(dueDate) : `Auto: In 10 min (${formatTime(new Date(Date.now() + 10 * 60 * 1000))})`}
+                                </Text>
+                                <Ionicons name="calendar-outline" size={22} color={colors.header} />
+                                {dueDate && reminderEnabled && (
+                                    <TouchableOpacity onPress={() => { setDueDate(null); setReminderOffset(undefined); }} style={styles.clearBtn}>
+                                        <Ionicons name="close-circle" size={20} color={colors.secondaryText} />
+                                    </TouchableOpacity>
+                                )}
+                            </TouchableOpacity>
+                            <View style={[styles.underline, { backgroundColor: colors.border }]} />
+
+                            {dueDate && (
+                                <>
+                                    <TouchableOpacity 
+                                        style={styles.pickerRow} 
+                                        onPress={() => reminderEnabled && setShowTimePicker(true)}
+                                        disabled={!reminderEnabled}
+                                    >
+                                        <Text style={[styles.pickerText, { color: colors.text }]}>{formatTime(dueDate)}</Text>
+                                        <Ionicons name="time-outline" size={22} color={colors.header} />
+                                    </TouchableOpacity>
+                                    <View style={[styles.underline, { backgroundColor: colors.border }]} />
+                                </>
+                            )}
+                        </View>
                     </View>
                 </ScrollView>
 

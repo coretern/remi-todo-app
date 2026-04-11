@@ -42,6 +42,7 @@ export default function HomeScreen() {
         deleteTodo: originalDeleteTodo,
         pinTodo: originalPinTodo,
         clearCompleted: originalClearCompleted,
+        archiveCompleted: originalArchiveCompleted,
         isLoading,
         count,
         completedCount
@@ -71,6 +72,17 @@ export default function HomeScreen() {
     const deleteTodo = (id: string) => {
         const todo = todos.find(t => t.id === id);
         if (!todo) return;
+
+        if (Platform.OS === 'web') {
+            const confirmMsg = todo.type === 'streak' 
+                ? "This will permanently erase your streak progress and statistics. Are you absolutely sure?" 
+                : "Are you sure you want to remove this task?";
+            
+            if (window.confirm(confirmMsg)) {
+                originalDeleteTodo(id);
+            }
+            return;
+        }
 
         if (todo.type === 'streak') {
             // STREAK DOUBLE CONFIRMATION 🛡️
@@ -133,6 +145,31 @@ export default function HomeScreen() {
         originalClearCompleted();
     };
 
+    const archiveCompleted = () => {
+        if (Platform.OS === 'web') {
+            // Direct confirmation for Web to avoid browser Modal blocks
+            if (window.confirm("Move all completed missions to your history record?")) {
+                originalArchiveCompleted();
+            }
+            return;
+        }
+
+        Alert.alert(
+            "Move to History?",
+            "This will move all completed missions to your permanent history record. They will no longer appear in this list.",
+            [
+                { text: "Cancel", style: "cancel" },
+                { 
+                    text: "Move All", 
+                    onPress: () => {
+                        LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+                        originalArchiveCompleted();
+                    }
+                }
+            ]
+        );
+    };
+
     const handleShare = async () => {
         try {
             await Share.share({
@@ -143,18 +180,18 @@ export default function HomeScreen() {
         }
     };
 
-    const [filter, setFilter] = useState<'Active' | 'Completed' | 'All'>('Active');
+    const [filter, setFilter] = useState<'Active' | 'Completed'>('Active');
 
     const filteredTodos = todos.filter(t => {
+        if (t.isArchived) return false;
         if (isSearching && searchQuery) {
             return t.task.toLowerCase().includes(searchQuery.toLowerCase());
         }
-        if (filter === 'All') return true;
         if (filter === 'Active') return !t.completed;
         return t.completed;
     });
 
-    const handleFilterChange = (newFilter: 'Active' | 'Completed' | 'All') => {
+    const handleFilterChange = (newFilter: 'Active' | 'Completed') => {
         LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
         setFilter(newFilter);
     };
@@ -224,12 +261,6 @@ export default function HomeScreen() {
             {!isSearching && (
                 <View style={[styles.filterContainer, { backgroundColor: colors.header }]}>
                     <TouchableOpacity 
-                        style={[styles.filterTab, filter === 'All' && styles.activeFilterTab]} 
-                        onPress={() => handleFilterChange('All')}
-                    >
-                        <Text style={[styles.filterText, filter === 'All' ? styles.activeFilterText : { color: 'rgba(255,255,255,0.7)' }]}>All</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity 
                         style={[styles.filterTab, filter === 'Active' && styles.activeFilterTab]} 
                         onPress={() => handleFilterChange('Active')}
                     >
@@ -291,6 +322,17 @@ export default function HomeScreen() {
                             onShowCert={setSelectedCert}
                         />
                     )}
+                    ListHeaderComponent={
+                        filter === 'Completed' && filteredTodos.length > 0 ? (
+                            <TouchableOpacity 
+                                style={[styles.archiveHeader, { backgroundColor: colors.surface, borderColor: colors.border }]}
+                                onPress={archiveCompleted}
+                            >
+                                <Ionicons name="archive-outline" size={20} color={colors.header} />
+                                <Text style={[styles.archiveHeaderText, { color: colors.header }]}>Move all to History</Text>
+                            </TouchableOpacity>
+                        ) : null
+                    }
                     contentContainerStyle={[
                         styles.listContainer, 
                         { paddingBottom: 100 + insets.bottom } 
@@ -304,8 +346,7 @@ export default function HomeScreen() {
                                 color={theme === 'dark' ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.05)"} 
                             />
                             <Text style={[styles.emptyText, { color: colors.secondaryText }]}>
-                                {filter === 'All' ? 'No Missions Found.' : 
-                                 filter === 'Active' ? 'All Missions Completed.' : 
+                                {filter === 'Active' ? 'All Missions Completed.' : 
                                  'No Completed Missions.'}
                             </Text>
                         </View>
@@ -415,10 +456,7 @@ const styles = StyleSheet.create({
         borderRadius: 33,
         justifyContent: 'center',
         alignItems: 'center',
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.2,
-        shadowRadius: 8,
+        boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.2)',
         elevation: 8,
         zIndex: 1000,
     },
@@ -456,10 +494,7 @@ const styles = StyleSheet.create({
         width: 250,
         borderRadius: 12,
         paddingVertical: 5,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 10 },
-        shadowOpacity: 0.3,
-        shadowRadius: 10,
+        boxShadow: '0px 10px 10px rgba(0, 0, 0, 0.3)',
         elevation: 15,
     },
     dropdownItem: {
@@ -493,5 +528,20 @@ const styles = StyleSheet.create({
     },
     activeFilterText: {
         color: 'white',
+    },
+    archiveHeader: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingVertical: 12,
+        borderRadius: 12,
+        marginBottom: 15,
+        borderWidth: 1,
+        borderStyle: 'dashed',
+    },
+    archiveHeaderText: {
+        fontSize: 14,
+        fontWeight: '700',
+        marginLeft: 8,
     },
 });

@@ -1,5 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
+import { Platform } from 'react-native';
 import { Todo } from '../types/todo';
 import { useNotifications } from '../hooks/useNotifications';
 import { SyncService } from '../services/SyncService';
@@ -12,6 +13,7 @@ interface TodoContextType {
     deleteTodo: (id: string) => void;
     pinTodo: (id: string) => void;
     clearCompleted: () => void;
+    archiveCompleted: () => void;
     syncWithCloud: () => Promise<void>;
     count: number;
     completedCount: number;
@@ -69,6 +71,7 @@ export function TodoProvider({ children }: { children: React.ReactNode }) {
         };
         checkSyncStatus();
     }, [syncWithCloud]);
+
 
     useEffect(() => {
         const loadTodos = async () => {
@@ -191,7 +194,7 @@ export function TodoProvider({ children }: { children: React.ReactNode }) {
                         if (todo.reminderId) cancelReminder(todo.reminderId);
                         return { ...todo, completed: true, completedAt: now, reminderId: undefined };
                     } else {
-                        return { ...todo, completed: false, completedAt: undefined };
+                        return { ...todo, completed: false, completedAt: undefined, isArchived: false };
                     }
                 }
                 return todo;
@@ -244,6 +247,63 @@ export function TodoProvider({ children }: { children: React.ReactNode }) {
         });
     }, [cancelReminder]);
 
+    const archiveCompleted = useCallback(() => {
+        const toArchive = todos.filter(t => t.completed || t.isBroken);
+        if (toArchive.length === 0) return;
+
+        const updated = todos.map(t => (t.completed || t.isBroken) ? { ...t, isArchived: true } : t);
+        setTodos(updated);
+        
+        // Push to cloud background sync logic
+        SyncService.backupToCloud(updated);
+        console.log(`[Archive] Successfully moved ${toArchive.length} items to history.`);
+    }, [todos]);
+
+    // LISTEN FOR NOTIFICATION ACTIONS (COMPLETE, TRASH) 📱
+    useEffect(() => {
+        if (Platform.OS === 'web') return;
+        
+        let Notifications: any;
+        try {
+            Notifications = require('expo-notifications');
+        } catch (e) {
+            return;
+        }
+
+        const subscription = Notifications.addNotificationResponseReceivedListener((response: any) => {
+            const actionIdentifier = response.actionIdentifier;
+            const todoId = response.notification.request.content.data?.id;
+
+            if (!todoId) return;
+
+            if (actionIdentifier === 'COMPLETE') {
+                toggleTodo(todoId);
+            } else if (actionIdentifier === 'TRASH') {
+                deleteTodo(todoId);
+            }
+        });
+
+        return () => subscription.remove();
+    }, [toggleTodo, deleteTodo]);
+
+    // UPDATE HOME SCREEN WIDGET 🏠
+    useEffect(() => {
+        if (Platform.OS !== 'android' || isLoading) return;
+
+        const updateWidget = async () => {
+            try {
+                // Using dynamic import to avoid issues on non-android platforms
+                const { requestWidgetUpdate } = require('react-native-android-widget');
+                requestWidgetUpdate({
+                    widgetName: 'TodoWidget',
+                });
+            } catch (e) {
+                // Widget might not be configured or platform not supported
+            }
+        };
+        updateWidget();
+    }, [todos, isLoading]);
+
     return (
         <TodoContext.Provider value={{
             todos,
@@ -253,9 +313,10 @@ export function TodoProvider({ children }: { children: React.ReactNode }) {
             deleteTodo,
             pinTodo,
             clearCompleted,
+            archiveCompleted,
             syncWithCloud,
-            count: todos.length,
-            completedCount: todos.filter(t => t.completed).length,
+            count: todos.filter(t => !t.isArchived).length,
+            completedCount: todos.filter(t => t.completed && !t.isArchived).length,
         }}>
             {children}
         </TodoContext.Provider>

@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
-import { Text, TouchableOpacity, View, ScrollView, Image } from 'react-native';
+import { Image, Text, TouchableOpacity, View } from 'react-native';
 import { Todo } from '../../../types/todo';
 import { styles } from './styles';
 
@@ -34,6 +34,32 @@ const TodoItem: React.FC<TodoItemProps> = ({ todo, onToggle, onDelete, onPin, on
         });
     };
 
+    const getTimeRemaining = (dueDate?: number): { text: string, isOverdue: boolean } | null => {
+        if (!dueDate || todo.completed) return null;
+        const now = Date.now();
+        const diff = dueDate - now;
+        
+        if (diff <= 0) {
+            const timeStr = new Date(dueDate).toLocaleTimeString(timeFormat === '12h' ? 'en-US' : 'en-GB', { 
+                hour: 'numeric', 
+                minute: '2-digit', 
+                hour12: timeFormat === '12h' 
+            });
+            return { text: `Overdue at ${timeStr}`, isOverdue: true };
+        }
+        
+        const mins = Math.round(diff / 60000);
+        if (mins < 60) return { text: `(In ${mins} min)`, isOverdue: false };
+        
+        const hours = Math.floor(mins / 60);
+        const remainingMins = mins % 60;
+        if (hours < 24) return { text: `(In ${hours}h ${remainingMins}m)`, isOverdue: false };
+        
+        return { text: `(In ${Math.floor(hours / 24)}d)`, isOverdue: false };
+    };
+
+    const timeInfo = getTimeRemaining(todo.dueDate);
+
     return (
         <View style={[styles.container, { backgroundColor: colors.surface, borderColor: colors.border, paddingRight: 12 }]}>
             <View style={styles.content}>
@@ -62,7 +88,7 @@ const TodoItem: React.FC<TodoItemProps> = ({ todo, onToggle, onDelete, onPin, on
                                     todo.icon === 'study' ? require('../../../assets/icon/study.jpeg') :
                                     null
                                 } 
-                                style={{ width: 14, height: 14, marginRight: 6, borderRadius: 2 }} 
+                                style={{ width: 14, height: 14, marginRight: 6, borderRadius: 2, opacity: 0.9 }} 
                             />
                         )}
                         <Text style={[styles.text, todo.completed && styles.completedText, { color: colors.text, fontSize: 16, fontWeight: '700', flexShrink: 1 }]}>
@@ -79,9 +105,31 @@ const TodoItem: React.FC<TodoItemProps> = ({ todo, onToggle, onDelete, onPin, on
                                 </Text>
                             </View>
                         )}
-                        <Text style={[styles.timestamp, { color: colors.secondaryText, opacity: 0.4 }]}>
-                            {formatDate(todo.createdAt)}
-                        </Text>
+                        
+                        <View style={{ flex: 1, flexDirection: todo.type === 'streak' ? 'column' : 'row', alignItems: todo.type === 'streak' ? 'flex-start' : 'center' }}>
+                            <Text style={[styles.timestamp, { color: colors.secondaryText, opacity: 0.4 }]}>
+                                {formatDate(todo.createdAt)}
+                            </Text>
+                            {timeInfo && (
+                                <View style={{ 
+                                    flexDirection: 'row', 
+                                    alignItems: 'center', 
+                                    marginTop: todo.type === 'streak' ? 1.5 : 1, 
+                                    marginLeft: todo.type === 'streak' ? 0 : 6, 
+                                    opacity: timeInfo.isOverdue ? 0.7 : 0.5 
+                                }}>
+                                    {!timeInfo.isOverdue && <Ionicons name="notifications-outline" size={8} color={colors.secondaryText} style={{ marginRight: 1, marginTop: 2 }} />}
+                                    <Text style={{ 
+                                        fontSize: 7.1, 
+                                        color: timeInfo.isOverdue ? '#EF4444' : colors.secondaryText, 
+                                        fontWeight: '700',
+                                        textTransform: timeInfo.isOverdue ? 'uppercase' : 'none'
+                                    }}>
+                                        {timeInfo.text}
+                                    </Text>
+                                </View>
+                            )}
+                        </View>
                     </View>
                 </View>
             </View>
