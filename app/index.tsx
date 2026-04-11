@@ -41,7 +41,7 @@ export default function HomeScreen() {
         toggleTodo: originalToggleTodo,
         deleteTodo: originalDeleteTodo,
         pinTodo: originalPinTodo,
-        clearCompleted: originalClearCompleted,
+        clearHistory: originalClearHistory,
         archiveCompleted: originalArchiveCompleted,
         isLoading,
         count,
@@ -140,9 +140,9 @@ export default function HomeScreen() {
         originalPinTodo(id);
     };
 
-    const clearCompleted = () => {
+    const clearHistory = () => {
         LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-        originalClearCompleted();
+        originalClearHistory();
     };
 
     const archiveCompleted = () => {

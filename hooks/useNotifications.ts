@@ -1,4 +1,4 @@
-import notifee, { AndroidImportance, AndroidNotificationVisibility, TimestampTrigger, TriggerType, EventType } from '@notifee/react-native';
+import notifee, { AndroidImportance, AndroidNotificationVisibility, TimestampTrigger, TriggerType, EventType, AndroidAlarmAllowance } from '@notifee/react-native';
 import { useCallback, useEffect, useState } from 'react';
 import { Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -14,7 +14,7 @@ export const useNotifications = () => {
             const settings = await notifee.requestPermission();
             setIsPermissionGranted(settings.authorizationStatus >= 1);
 
-            // Create a high-priority channel for Android
+            // 2. Create high-priority channel for Android
             if (Platform.OS === 'android') {
                 await notifee.createChannel({
                     id: 'missions',
@@ -26,6 +26,29 @@ export const useNotifications = () => {
                     lightColor: '#0a7ea4',
                     badge: true,
                 });
+
+                // Check for exact alarm permission (Android 13+)
+                const settings = await notifee.getNotificationSettings();
+                if (settings.android.alarm === AndroidAlarmAllowance.DENIED) {
+                    console.warn('[Notifee] Exact alarms are denied. Reminders might be delayed.');
+                    // In a real app, you might call notifee.openAlarmSettings()
+                }
+            }
+
+            // 3. Set up categories for iOS (adds action buttons)
+            if (Platform.OS === 'ios') {
+                await notifee.setNotificationCategories([
+                    {
+                        id: 'mission',
+                        actions: [
+                            {
+                                id: 'COMPLETE',
+                                title: 'Mark Done',
+                                foreground: true,
+                            },
+                        ],
+                    },
+                ]);
             }
         } catch (error) {
             console.log('[Notifee Setup Error]', error);
@@ -74,6 +97,7 @@ export const useNotifications = () => {
                     },
                     ios: {
                         critical: true,
+                        categoryId: 'mission',
                         foregroundPresentationOptions: {
                             badge: true,
                             sound: true,

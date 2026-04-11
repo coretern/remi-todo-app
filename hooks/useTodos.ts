@@ -8,7 +8,7 @@ export const useTodos = () => {
         addTodo: context.addTodo,
         toggleTodo: context.toggleTodo,
         deleteTodo: context.deleteTodo,
-        clearCompleted: context.clearCompleted,
+        clearHistory: context.clearHistory,
         archiveCompleted: context.archiveCompleted,
         pinTodo: context.pinTodo,
         syncWithCloud: context.syncWithCloud,

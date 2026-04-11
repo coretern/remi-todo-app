@@ -13,7 +13,7 @@ interface TodoContextType {
     toggleTodo: (id: string) => void;
     deleteTodo: (id: string) => void;
     pinTodo: (id: string) => void;
-    clearCompleted: () => void;
+    clearHistory: () => void;
     archiveCompleted: () => void;
     syncWithCloud: () => Promise<void>;
     count: number;
@@ -256,15 +256,15 @@ export function TodoProvider({ children }: { children: React.ReactNode }) {
         });
     }, [cancelReminder]);
 
-    const clearCompleted = useCallback(() => {
+    const clearHistory = useCallback(() => {
         setTodos(prev => {
-            const completed = prev.filter(t => t.completed);
-            completed.forEach(t => {
+            const toClear = prev.filter(t => t.isArchived);
+            toClear.forEach(t => {
                 if (t.reminderId) cancelReminder(t.reminderId);
                 // Mirror Cleanup in Cloud 🧼
                 SyncService.deleteFromCloud(t.id);
             });
-            const updated = prev.filter(todo => !todo.completed);
+            const updated = prev.filter(todo => !todo.isArchived);
             SyncService.backupToCloud(updated); // Final array sync
             return updated;
         });
@@ -326,7 +326,7 @@ export function TodoProvider({ children }: { children: React.ReactNode }) {
             toggleTodo,
             deleteTodo,
             pinTodo,
-            clearCompleted,
+            clearHistory,
             archiveCompleted,
             syncWithCloud,
             count: todos.filter(t => !t.isArchived).length,

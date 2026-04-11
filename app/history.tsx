@@ -19,7 +19,7 @@ import CertificateModal from '../components/todo/CertificateModal';
 export default function HistoryScreen() {
     const router = useRouter();
     const { colors, theme, timeFormat } = useTheme();
-    const { todos, toggleTodo, deleteTodo, clearCompleted, completedCount } = useTodos();
+    const { todos, toggleTodo, deleteTodo, clearHistory, completedCount } = useTodos();
 
     const [selectedCert, setSelectedCert] = useState<any>(null);
     const [filter, setFilter] = useState<'All' | 'Streak' | 'Normal'>('All');
@@ -90,7 +90,7 @@ export default function HistoryScreen() {
             "Are you absolutely sure? This action CANNOT be undone and will permanently wipe your entire history.",
             [
                 { text: "Cancel", style: "cancel" },
-                { text: "WIPE EVERYTHING", style: "destructive", onPress: clearCompleted }
+                { text: "WIPE EVERYTHING", style: "destructive", onPress: clearHistory }
             ]
         );
     };
@@ -98,7 +98,7 @@ export default function HistoryScreen() {
     const handleClearHistory = () => {
         if (Platform.OS === 'web') {
             if (window.confirm("Are you sure you want to delete ALL completed missions forever? This cannot be undone.")) {
-                clearCompleted();
+                clearHistory();
             }
             return;
         }
