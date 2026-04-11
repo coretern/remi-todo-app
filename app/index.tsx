@@ -143,15 +143,21 @@ export default function HomeScreen() {
         }
     };
 
-    const [filter, setFilter] = useState<'Active' | 'Completed'>('Active');
+    const [filter, setFilter] = useState<'Active' | 'Completed' | 'All'>('Active');
 
     const filteredTodos = todos.filter(t => {
         if (isSearching && searchQuery) {
             return t.task.toLowerCase().includes(searchQuery.toLowerCase());
         }
+        if (filter === 'All') return true;
         if (filter === 'Active') return !t.completed;
         return t.completed;
     });
+
+    const handleFilterChange = (newFilter: 'Active' | 'Completed' | 'All') => {
+        LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+        setFilter(newFilter);
+    };
 
     if (isLoading) {
         return (
@@ -215,6 +221,29 @@ export default function HomeScreen() {
                 )}
             </View>
 
+            {!isSearching && (
+                <View style={[styles.filterContainer, { backgroundColor: colors.header }]}>
+                    <TouchableOpacity 
+                        style={[styles.filterTab, filter === 'All' && styles.activeFilterTab]} 
+                        onPress={() => handleFilterChange('All')}
+                    >
+                        <Text style={[styles.filterText, filter === 'All' ? styles.activeFilterText : { color: 'rgba(255,255,255,0.7)' }]}>All</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity 
+                        style={[styles.filterTab, filter === 'Active' && styles.activeFilterTab]} 
+                        onPress={() => handleFilterChange('Active')}
+                    >
+                        <Text style={[styles.filterText, filter === 'Active' ? styles.activeFilterText : { color: 'rgba(255,255,255,0.7)' }]}>Active</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity 
+                        style={[styles.filterTab, filter === 'Completed' && styles.activeFilterTab]} 
+                        onPress={() => handleFilterChange('Completed')}
+                    >
+                        <Text style={[styles.filterText, filter === 'Completed' ? styles.activeFilterText : { color: 'rgba(255,255,255,0.7)' }]}>Completed</Text>
+                    </TouchableOpacity>
+                </View>
+            )}
+
             <Modal
                 visible={showPagesModal}
                 transparent={true}
@@ -269,8 +298,16 @@ export default function HomeScreen() {
                     showsVerticalScrollIndicator={false}
                     ListEmptyComponent={
                         <View style={styles.emptyContainer}>
-                            <Ionicons name="checkmark-done" size={60} color={theme === 'dark' ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.05)"} />
-                            <Text style={[styles.emptyText, { color: colors.secondaryText }]}>All Missions Completed.</Text>
+                            <Ionicons 
+                                name={filter === 'Completed' ? "list-outline" : "checkmark-done"} 
+                                size={60} 
+                                color={theme === 'dark' ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.05)"} 
+                            />
+                            <Text style={[styles.emptyText, { color: colors.secondaryText }]}>
+                                {filter === 'All' ? 'No Missions Found.' : 
+                                 filter === 'Active' ? 'All Missions Completed.' : 
+                                 'No Completed Missions.'}
+                            </Text>
                         </View>
                     }
                 />
@@ -433,5 +470,28 @@ const styles = StyleSheet.create({
     dropdownItemText: {
         fontSize: 16,
         fontWeight: '600',
+    },
+    filterContainer: {
+        flexDirection: 'row',
+        paddingHorizontal: 15,
+        paddingBottom: 10,
+        height: 50,
+        alignItems: 'center',
+    },
+    filterTab: {
+        paddingHorizontal: 20,
+        paddingVertical: 8,
+        borderRadius: 20,
+        marginRight: 10,
+    },
+    activeFilterTab: {
+        backgroundColor: 'rgba(255,255,255,0.2)',
+    },
+    filterText: {
+        fontSize: 14,
+        fontWeight: '700',
+    },
+    activeFilterText: {
+        color: 'white',
     },
 });
