@@ -58,12 +58,6 @@
     "plugins": [
       "expo-router",
       [
-        "expo-notifications",
-        {
-          "color": "#0a7ea4"
-        }
-      ],
-      [
         "expo-splash-screen",
         {
           "image": "./assets/images/remiicon.png",

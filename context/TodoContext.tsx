@@ -4,6 +4,7 @@ import { Platform } from 'react-native';
 import { Todo } from '../types/todo';
 import { useNotifications } from '../hooks/useNotifications';
 import { SyncService } from '../services/SyncService';
+import notifee, { EventType } from '@notifee/react-native';
 
 interface TodoContextType {
     todos: Todo[];
@@ -281,32 +282,21 @@ export function TodoProvider({ children }: { children: React.ReactNode }) {
         console.log(`[Archive] Successfully moved ${toArchive.length} items to history.`);
     }, [todos]);
 
-    // LISTEN FOR NOTIFICATION ACTIONS (COMPLETE, TRASH) 📱
+    // LISTEN FOR NOTIFICATION ACTIONS (COMPLETE) 📱
     useEffect(() => {
         if (Platform.OS === 'web') return;
         
-        let Notifications: any;
-        try {
-            Notifications = require('expo-notifications');
-        } catch (e) {
-            return;
-        }
-
-        const subscription = Notifications.addNotificationResponseReceivedListener((response: any) => {
-            const actionIdentifier = response.actionIdentifier;
-            const todoId = response.notification.request.content.data?.id;
-
-            if (!todoId) return;
-
-            if (actionIdentifier === 'COMPLETE') {
-                toggleTodo(todoId);
-            } else if (actionIdentifier === 'TRASH') {
-                deleteTodo(todoId);
+        const unsubscribe = notifee.onForegroundEvent(({ type, detail }) => {
+            if (type === EventType.ACTION_PRESS && detail.actionId === 'COMPLETE') {
+                const todoId = detail.notification?.id;
+                if (todoId) {
+                    toggleTodo(todoId);
+                }
             }
         });
 
-        return () => subscription.remove();
-    }, [toggleTodo, deleteTodo]);
+        return () => unsubscribe();
+    }, [toggleTodo]);
 
     // UPDATE HOME SCREEN WIDGET 🏠
     useEffect(() => {

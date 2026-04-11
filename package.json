@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@expo/vector-icons": "~15.0.0",
+    "@notifee/react-native": "^9.1.8",
     "@react-native-async-storage/async-storage": "2.2.0",
     "@react-native-community/datetimepicker": "8.6.0",
     "@react-navigation/bottom-tabs": "^7.2.0",
@@ -28,7 +29,6 @@
     "expo-linear-gradient": "~55.0.0",
     "expo-linking": "~55.0.0",
     "expo-media-library": "~55.0.0",
-    "expo-notifications": "~55.0.0",
     "expo-router": "~55.0.0",
     "expo-splash-screen": "~55.0.0",
     "expo-status-bar": "~55.0.2",

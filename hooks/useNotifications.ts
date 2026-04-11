@@ -1,162 +1,104 @@
-import Constants from 'expo-constants';
-import * as Device from 'expo-device';
+import notifee, { AndroidImportance, AndroidNotificationVisibility, TimestampTrigger, TriggerType, EventType } from '@notifee/react-native';
 import { useCallback, useEffect, useState } from 'react';
 import { Platform } from 'react-native';
-
-// Helper to get notifications instance safely
-const getNotifications = () => {
-    try {
-        if (Platform.OS === 'web') return null;
-        return require('expo-notifications');
-    } catch (e) {
-        return null;
-    }
-};
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export const useNotifications = () => {
-    const [expoPushToken, setExpoPushToken] = useState('');
+    const [isPermissionGranted, setIsPermissionGranted] = useState(false);
 
     const setupNotificationsAsync = useCallback(async () => {
-        const Notifications = getNotifications();
-        if (!Notifications || Platform.OS === 'web') return;
+        if (Platform.OS === 'web') return;
 
         try {
-            // 1. Initial Configuration (Must be done early)
-            Notifications.setNotificationHandler({
-                handleNotification: async () => ({
-                    shouldShowAlert: true,
-                    shouldPlaySound: true,
-                    shouldSetBadge: true,
-                    priority: Notifications.AndroidImportance.MAX,
-                }),
-            });
+            // Request permissions (Android 13+ requires this)
+            const settings = await notifee.requestPermission();
+            setIsPermissionGranted(settings.authorizationStatus >= 1);
 
-            // 2. Check & Request Permissions
-            const { status: existingStatus } = await Notifications.getPermissionsAsync();
-            let finalStatus = existingStatus;
-
-            if (existingStatus !== 'granted') {
-                const { status } = await Notifications.requestPermissionsAsync();
-                finalStatus = status;
-            }
-
-            if (finalStatus !== 'granted') {
-                console.log('[Notification Warning] Permission not granted');
-                return;
-            }
-
-            // 2.5 Check Exact Alarm permission for Android 12+
+            // Create a high-priority channel for Android
             if (Platform.OS === 'android') {
-                const { canScheduleExactAlarms } = await Notifications.getPermissionsAsync();
-                if (!canScheduleExactAlarms) {
-                    console.log('[Notification Warning] Exact Alarms not permitted - timing may be imprecise.');
-                    // Optionally we could request this, but it requires a specific intent on most devices
-                }
-            }
-
-            // 3. Setup Android Channel (Vital for Android 8+)
-            if (Platform.OS === 'android') {
-                await Notifications.setNotificationChannelAsync('missions', {
+                await notifee.createChannel({
+                    id: 'missions',
                     name: 'Mission Reminders',
-                    importance: Notifications.AndroidImportance.MAX,
-                    vibrationPattern: [0, 250, 250, 250],
+                    importance: AndroidImportance.HIGH,
+                    visibility: AndroidNotificationVisibility.PUBLIC,
+                    vibration: true,
+                    vibrationPattern: [300, 500],
                     lightColor: '#0a7ea4',
-                    lockscreenVisibility: Notifications.AndroidNotificationVisibility.PUBLIC,
-                    showBadge: true,
-                    enableVibrate: true,
-                    sound: 'default',
-                    bypassDnd: true,
+                    badge: true,
                 });
             }
-
-            // 4. Setup Categories for Actions
-            await Notifications.setNotificationCategoryAsync('mission_actions', [
-                {
-                    identifier: 'COMPLETE',
-                    buttonTitle: 'COMPLETE',
-                    options: { isDestructive: false },
-                },
-                {
-                    identifier: 'TRASH',
-                    buttonTitle: 'TRASH',
-                    options: { isDestructive: true },
-                },
-            ]);
-
-            // 5. Token logic (Only for standalone builds)
-            const isExpoGo = Constants.executionEnvironment === 'storeClient';
-            if (Device.isDevice && !isExpoGo) {
-                try {
-                    const tokenData = await Notifications.getExpoPushTokenAsync({
-                        projectId: Constants.expoConfig?.extra?.eas?.projectId,
-                    });
-                    setExpoPushToken(tokenData.data);
-                } catch (e) {
-                    console.log('Push token skip');
-                }
-            }
-
         } catch (error) {
-            console.log('Notification setup Error:', error);
+            console.log('[Notifee Setup Error]', error);
         }
     }, []);
 
     const scheduleTodoReminder = useCallback(async (id: string, task: string, dueDate: number, minutesBefore: number = 0) => {
-        const Notifications = getNotifications();
-        if (!Notifications || Platform.OS === 'web') return null;
-
-        // Ensure setup is done (in case it's the first run)
-        await setupNotificationsAsync();
+        if (Platform.OS === 'web') return null;
 
         const triggerTime = dueDate - (minutesBefore * 60 * 1000);
-        const triggerDate = new Date(triggerTime);
         
-        if (triggerDate.getTime() <= Date.now()) {
-            if (Date.now() - triggerDate.getTime() < 10000) {
-                triggerDate.setTime(Date.now() + 5000);
-            } else {
-                return null;
-            }
-        }
+        // Safety: If time is in the past, fire in 2 seconds for testing
+        const now = Date.now();
+        const adjustedTriggerTime = triggerTime <= now ? now + 2000 : triggerTime;
 
         try {
-            const notificationId = await Notifications.scheduleNotificationAsync({
-                content: {
-                    title: "Mission Alert ⏰",
-                    body: (minutesBefore > 0 
+            // Create a timestamp-based trigger
+            const trigger: TimestampTrigger = {
+                type: TriggerType.TIMESTAMP,
+                timestamp: adjustedTriggerTime,
+                alarmManager: true, // Use AlarmManager for high accuracy on Android
+            };
+
+            const notificationId = await notifee.createTriggerNotification(
+                {
+                    id: id, // Use the todo ID as the notification ID for easy management
+                    title: 'Mission Alert ⏰',
+                    body: minutesBefore > 0 
                         ? `${task.slice(0, 50)} starts in ${minutesBefore}m!` 
-                        : `Time for your mission: ${task.slice(0, 50)}`).trim(),
-                    data: { id },
-                    sound: 'default', 
-                    priority: Notifications.AndroidNotificationPriority.MAX,
-                    categoryIdentifier: 'mission_actions',
-                    color: '#0a7ea4',
+                        : `Time for your mission: ${task.slice(0, 50)}`,
                     android: {
                         channelId: 'missions',
-                        importance: Notifications.AndroidImportance.MAX,
-                        priority: 'max',
-                        visibility: 'public',
-                    }
+                        importance: AndroidImportance.HIGH,
+                        pressAction: {
+                            id: 'default',
+                        },
+                        // We can add actions like 'COMPLETE' later if needed
+                        actions: [
+                            {
+                                title: 'Mark Done',
+                                pressAction: { id: 'COMPLETE' },
+                            },
+                        ],
+                        smallIcon: 'ic_launcher', // Fallback to launcher icon
+                        color: '#0a7ea4',
+                    },
+                    ios: {
+                        critical: true,
+                        foregroundPresentationOptions: {
+                            badge: true,
+                            sound: true,
+                            banner: true,
+                            list: true,
+                        },
+                    },
                 },
-                trigger: {
-                    type: Notifications.SchedulableTriggerInputTypes.DATE,
-                    date: triggerDate,
-                },
-            });
-            return notificationId;
+                trigger,
+            );
+
+            console.log(`[Notifee] Scheduled mission: ${id} for ${new Date(adjustedTriggerTime).toLocaleString()}`);
+            return id; // With Notifee, we can use our own ID
         } catch (e) {
-            console.error('[Reminder Error]', e);
+            console.error('[Notifee Schedule Error]', e);
             return null;
         }
-    }, [setupNotificationsAsync]);
+    }, []);
 
     const cancelReminder = useCallback(async (id: string) => {
-        const Notifications = getNotifications();
-        if (!Notifications || Platform.OS === 'web' || !id) return;
+        if (Platform.OS === 'web' || !id) return;
         try {
-            await Notifications.cancelScheduledNotificationAsync(id);
+            await notifee.cancelNotification(id);
         } catch (e) {
-            console.log('Cancel Error', e);
+            console.log('[Notifee Cancel Error]', e);
         }
     }, []);
 
@@ -167,6 +109,36 @@ export const useNotifications = () => {
     return {
         scheduleTodoReminder,
         cancelReminder,
-        expoPushToken
+        isPermissionGranted,
     };
 };
+
+// Handle background events (when app is closed/background)
+notifee.onBackgroundEvent(async ({ type, detail }) => {
+    const { notification, actionId } = detail;
+
+    if (type === EventType.ACTION_PRESS && actionId === 'COMPLETE') {
+        const todoId = notification?.id;
+        if (todoId) {
+            try {
+                const STORAGE_KEY = '@todo_app_data';
+                const jsonValue = await AsyncStorage.getItem(STORAGE_KEY);
+                if (jsonValue != null) {
+                    const todos = JSON.parse(jsonValue);
+                    const updated = todos.map((t: any) => 
+                        t.id === todoId ? { ...t, completed: true, completedAt: Date.now(), reminderId: undefined } : t
+                    );
+                    await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+                    console.log(`[Notifee Background] Task ${todoId} marked as done.`);
+                }
+            } catch (e) {
+                console.error('[Notifee Background Error]', e);
+            }
+        }
+        
+        // Remove the notification
+        if (notification?.id) {
+            await notifee.cancelNotification(notification.id);
+        }
+    }
+});
