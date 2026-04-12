@@ -1,3 +1,4 @@
+import React from 'react';
 import { registerWidgetTaskHandler } from 'react-native-android-widget';
 import { TodoWidget } from './TodoWidget';
 import AsyncStorage from '@react-native-async-storage/async-storage';

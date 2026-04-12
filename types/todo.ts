@@ -18,6 +18,7 @@ export interface Todo {
     isPinned?: boolean;        // Master feature: Top of Home
     icon?: 'youtube' | 'instagram' | 'study' | 'default';
     isArchived?: boolean;      // Moved to History
+    streakStartedAt?: number;  // Timestamp of the first successful tick 🚀
 }
 
 export type TodoAction =

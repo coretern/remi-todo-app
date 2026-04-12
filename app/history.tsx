@@ -238,7 +238,7 @@ export default function HistoryScreen() {
 
                                 <Text style={[styles.dateText, { color: colors.secondaryText }]}>
                                     {item.type === 'streak' 
-                                        ? `Period: ${new Date(item.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })} — ${new Date(item.completedAt || Date.now()).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}`
+                                        ? `Period: ${new Date(item.streakStartedAt || item.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })} — ${new Date(item.completedAt || Date.now()).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}`
                                         : `Completed: ${new Date(item.completedAt || Date.now()).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })} at ${new Date(item.completedAt || Date.now()).toLocaleTimeString(timeFormat === '12h' ? 'en-US' : 'en-GB', { hour: 'numeric', minute: '2-digit', hour12: timeFormat === '12h' })}`
                                     }
                                 </Text>
@@ -254,12 +254,14 @@ export default function HistoryScreen() {
                                 </TouchableOpacity>
                             )}
 
-                            <TouchableOpacity 
-                                onPress={() => { toggleTodo(item.id); router.back(); }} 
-                                style={styles.actionBtn}
-                            >
-                                <Ionicons name="refresh-outline" size={18} color={colors.secondaryText} />
-                            </TouchableOpacity>
+                            {item.type !== 'streak' && (
+                                <TouchableOpacity 
+                                    onPress={() => { toggleTodo(item.id); router.back(); }} 
+                                    style={styles.actionBtn}
+                                >
+                                    <Ionicons name="refresh-outline" size={18} color={colors.secondaryText} />
+                                </TouchableOpacity>
+                            )}
                             <TouchableOpacity onPress={() => handleDeleteItem(item)} style={styles.actionBtn}>
                                 <Ionicons name="trash-outline" size={18} color={colors.secondaryText} />
                             </TouchableOpacity>

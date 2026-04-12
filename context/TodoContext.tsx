@@ -186,8 +186,8 @@ export function TodoProvider({ children }: { children: React.ReactNode }) {
             const today = getTodayISO();
             const updated = prev.map(todo => {
                 if (todo.id === id) {
-                    // RESTORE/UNDO LOGIC: If it's already completed or archived, always allow undoing it!
-                    if (todo.completed || todo.isArchived) {
+                    // RESTORE/UNDO LOGIC: Only allow undoing if it's NOT a streak mission
+                    if ((todo.completed || todo.isArchived) && todo.type !== 'streak') {
                         return { 
                             ...todo, 
                             completed: false, 
@@ -210,6 +210,7 @@ export function TodoProvider({ children }: { children: React.ReactNode }) {
                             ...todo,
                             currentStreak: newStreak,
                             lastCompletedDate: today,
+                            streakStartedAt: todo.streakStartedAt || Date.now(), // First tick records the start 🚀
                             completed: isFinished,
                             completedAt: isFinished ? Date.now() : undefined,
                         };

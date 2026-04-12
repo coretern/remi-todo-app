@@ -85,15 +85,13 @@ export const useNotifications = () => {
                         pressAction: {
                             id: 'default',
                         },
-                        // We can add actions like 'COMPLETE' later if needed
                         actions: [
                             {
                                 title: 'Mark Done',
                                 pressAction: { id: 'COMPLETE' },
                             },
                         ],
-                        smallIcon: 'ic_launcher', // Fallback to launcher icon
-                        color: '#0a7ea4',
+                        color: '#006EAF',
                     },
                     ios: {
                         critical: true,
@@ -149,11 +147,36 @@ notifee.onBackgroundEvent(async ({ type, detail }) => {
                 const jsonValue = await AsyncStorage.getItem(STORAGE_KEY);
                 if (jsonValue != null) {
                     const todos = JSON.parse(jsonValue);
-                    const updated = todos.map((t: any) => 
-                        t.id === todoId ? { ...t, completed: true, completedAt: Date.now(), reminderId: undefined } : t
-                    );
+                    
+                    const d = new Date();
+                    const today = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+                    
+                    const updated = todos.map((t: any) => {
+                        if (t.id === todoId) {
+                            if (t.type === 'streak') {
+                                // Prevent double-ticking in background
+                                if (t.lastCompletedDate === today) return t;
+                                
+                                const newStreak = (t.currentStreak || 0) + 1;
+                                const isFinished = newStreak === t.streakTarget;
+                                
+                                return {
+                                    ...t,
+                                    currentStreak: newStreak,
+                                    lastCompletedDate: today,
+                                    streakStartedAt: t.streakStartedAt || Date.now(),
+                                    completed: isFinished,
+                                    completedAt: isFinished ? Date.now() : undefined,
+                                    reminderId: undefined
+                                };
+                            }
+                            return { ...t, completed: true, completedAt: Date.now(), reminderId: undefined };
+                        }
+                        return t;
+                    });
+                    
                     await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
-                    console.log(`[Notifee Background] Task ${todoId} marked as done.`);
+                    console.log(`[Notifee Background] Mission ${todoId} processed (Streak-aware).`);
                 }
             } catch (e) {
                 console.error('[Notifee Background Error]', e);

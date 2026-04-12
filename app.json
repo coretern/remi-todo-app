@@ -24,7 +24,7 @@
     },
     "android": {
       "package": "com.remi.todoapp",
-      "versionCode": 3,
+      "versionCode": 2,
       "softwareKeyboardLayoutMode": "resize",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
@@ -48,7 +48,11 @@
             "scheme": "remi-todo"
           }
         }
-      ]
+      ],
+      "notification": {
+        "icon": "./assets/images/android-icon-monochrome.png",
+        "color": "#006EAF"
+      }
     },
     "web": {
       "output": "static",
@@ -56,6 +60,7 @@
       "description": "Remi Todo - Premium Minimalist Task Manager"
     },
     "plugins": [
+      "@notifee/react-native",
       "expo-router",
       [
         "expo-splash-screen",

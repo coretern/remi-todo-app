@@ -26,7 +26,7 @@ export default function AboutScreen() {
     };
 
     const handleVideoTutorial = () => {
-        Linking.openURL('https://youtu.be/U74-wQrSOtc?si=Y0F4QGyOCEXLu8D1');
+        Linking.openURL('https://youtube.com/@anilmonitor?si=4I4oRQ_CT3v5Jn_4');
     };
 
     return (

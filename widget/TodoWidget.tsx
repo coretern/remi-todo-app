@@ -33,20 +33,18 @@ export function TodoWidget({ todos }: { todos: Todo[] }) {
           style={{ fontSize: 14, color: '#666666', marginTop: 10 }}
         />
       ) : (
-        activeTodos.map((todo, index) => (
+        activeTodos.map((todo) => (
           <FlexWidget 
             key={todo.id} 
             style={{ 
               flexDirection: 'row', 
               alignItems: 'center', 
-              paddingVertical: 8,
-              borderBottomWidth: index === activeTodos.length -1 ? 0 : 1,
-              borderBottomColor: '#EEEEEE'
+              paddingVertical: 6,
             }}
           >
             <TextWidget
-              text={`• ${todo.task}`}
-              style={{ fontSize: 14, color: '#333333' }}
+              text={`•  ${todo.task}`}
+              style={{ fontSize: 14, color: '#333333', fontWeight: 'bold' }}
               maxLines={1}
             />
           </FlexWidget>

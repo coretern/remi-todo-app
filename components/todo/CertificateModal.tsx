@@ -109,7 +109,7 @@ export default function CertificateModal({ visible, selectedCert, onClose }: Pro
                                     </View>
                                     
                                     <Text style={styles.certBodyMain}>
-                                        Successfully completed <Text style={{ color: '#FFD700', fontWeight: '900' }}>{selectedCert?.streakTarget} DAY STREAK</Text> from {new Date(selectedCert?.createdAt || 0).toLocaleDateString('en-GB', { day: 'numeric', month: 'long' })} to {new Date(selectedCert?.completedAt || 0).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })} on {selectedCert?.task}
+                                        Successfully completed <Text style={{ color: '#FFD700', fontWeight: '900' }}>{selectedCert?.streakTarget} DAY STREAK</Text> from {new Date(selectedCert?.streakStartedAt || selectedCert?.createdAt || 0).toLocaleDateString('en-GB', { day: 'numeric', month: 'long' })} to {new Date(selectedCert?.completedAt || 0).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })} on {selectedCert?.task}
                                     </Text>
 
                                     <View style={styles.sealFooterRow}>

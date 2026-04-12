@@ -136,7 +136,7 @@ const TodoItem: React.FC<TodoItemProps> = ({ todo, onToggle, onDelete, onPin, on
             </View>
 
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                {todo.completed && (
+                {todo.completed && todo.type !== 'streak' && (
                     <TouchableOpacity 
                         onPress={() => onToggle(todo.id)} 
                         style={{ padding: 8, marginRight: 4 }}
