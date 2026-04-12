@@ -24,7 +24,7 @@
     },
     "android": {
       "package": "com.remi.todoapp",
-      "versionCode": 2,
+      "versionCode": 10,
       "softwareKeyboardLayoutMode": "resize",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
@@ -101,7 +101,7 @@
             }
           ]
         }
-      ],
+      ]
     ],
     "experiments": {
       "typedRoutes": true,
