@@ -98,7 +98,6 @@ export function TodoProvider({ children }: { children: React.ReactNode }) {
                                 const diffDays = (nowTime - refTime) / (1000 * 60 * 60 * 24);
                                 
                                 // BREAK CONDITION: If more than 1 full calendar day has passed since last tick
-                                // Example: Last tick 12th, Today 14th -> diffDays is 2 -> BREAK!
                                 if (diffDays > 1) {
                                     return { 
                                         ...todo, 
@@ -194,7 +193,6 @@ export function TodoProvider({ children }: { children: React.ReactNode }) {
                             completedAt: undefined, 
                             isArchived: false,
                             isBroken: false,
-                            // If it's a streak, keep the current streak count but allow continuing
                             lastCompletedDate: undefined 
                         };
                     }

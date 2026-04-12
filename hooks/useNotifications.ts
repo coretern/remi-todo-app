@@ -31,7 +31,6 @@ export const useNotifications = () => {
                 const settings = await notifee.getNotificationSettings();
                 if (settings.android.alarm === AndroidAlarmAllowance.DENIED) {
                     console.warn('[Notifee] Exact alarms are denied. Reminders might be delayed.');
-                    // In a real app, you might call notifee.openAlarmSettings()
                 }
             }
 
@@ -74,7 +73,7 @@ export const useNotifications = () => {
 
             const notificationId = await notifee.createTriggerNotification(
                 {
-                    id: id, // Use the todo ID as the notification ID for easy management
+                    id: id,
                     title: 'Mission Alert ⏰',
                     body: minutesBefore > 0 
                         ? `${task.slice(0, 50)} starts in ${minutesBefore}m!` 
@@ -108,7 +107,7 @@ export const useNotifications = () => {
             );
 
             console.log(`[Notifee] Scheduled mission: ${id} for ${new Date(adjustedTriggerTime).toLocaleString()}`);
-            return id; // With Notifee, we can use our own ID
+            return id;
         } catch (e) {
             console.error('[Notifee Schedule Error]', e);
             return null;

@@ -60,7 +60,6 @@
       "description": "Remi Todo - Premium Minimalist Task Manager"
     },
     "plugins": [
-      "@notifee/react-native",
       "expo-router",
       [
         "expo-splash-screen",
@@ -102,6 +101,10 @@
             }
           ]
         }
+      ],
+      [
+        "@notifee/react-native",
+        {}
       ]
     ],
     "experiments": {
