@@ -238,25 +238,25 @@
         <header>
             <div class="logo-placeholder">RT</div>
             <h1>Privacy Policy</h1>
-            <p class="last-updated">Last Updated: April 03, 2026</p>
+            <p class="last-updated">Last Updated: April 12, 2026</p>
         </header>
 
         <main class="card">
             <section id="intro">
-                <p>Welcome to <strong>Remi Todo</strong>. Your privacy is critically important to us. This Privacy
-                    Policy describes how we collect, use, and handle your data across our mobile application.</p>
+                <p>Welcome to <strong>Remi Todo (v1.0.2)</strong>. Your privacy is critically important to us. This policy explains how we handle your data in the latest version of our mission tracker.</p>
                 <div class="highlight-box">
-                    <p><strong>Hybrid Data Model:</strong> Remi Todo defaults to local-only storage, but offers an optional Cloud Sync feature for users who wish to preserve their data across devices.</p>
+                    <p><strong>v1.0.2 Update:</strong> We have introduced a <strong>Daily Streak System</strong> and <strong>Mission Mastery Certificates</strong>. These features are designed to keep you consistent while maintaining our privacy-first local storage approach.</p>
                 </div>
             </section>
 
             <section id="collection">
                 <h2><span>📂</span> 1. Information Collection and Use</h2>
-                <p>We process two types of data depending on your chosen settings:</p>
+                <p>We process data to help you conquer your missions:</p>
                 <ul>
-                    <li><strong>Local Data (Default):</strong> Tasks, History, and Missions are stored on your device using encrypted <code>AsyncStorage</code>. This data never leaves your device unless you enable Sync.</li>
-                    <li><strong>Cloud Data (Optional):</strong> If you enable "Cloud Sync", we collect your <strong>Email Address</strong> and your <strong>Task List</strong> to store them securely in <code>Google Firebase Firestore</code>. This allows you to restore your data if you switch devices.</li>
-                    <li><strong>Calendar Data (Optional):</strong> If you enable Google Calendar integration, the app will sync your tasks to your primary Google Calendar.</li>
+                    <li><strong>Local Data (Default):</strong> Tasks, Streak History, and Mission data are stored on your device using encrypted <code>AsyncStorage</code>. This data never leaves your device unless you enable Sync.</li>
+                    <li><strong>Cloud Data (Optional):</strong> If you enable "Cloud Sync", we securely store your <strong>Email</strong> and <strong>Mission Data</strong> in <code>Firebase</code> to allow cross-device recovery.</li>
+                    <li><strong>Streak Records:</strong> The app tracks your daily check-ins locally to maintain your "Mission Mastery" progress.</li>
+                    <li><strong>Certificates:</strong> When you complete a streak, the app generates a "Mission Mastery Certificate" locally. We do not store these images on our servers.</li>
                 </ul>
             </section>
 
@@ -264,8 +264,10 @@
                 <h2><span>🔔</span> 2. Notifications & Permissions</h2>
                 <p>The app requests specific permissions to function correctly:</p>
                 <ul>
-                    <li><strong>Notifications:</strong> Used for mission reminders and task updates. This is triggered locally on your device.</li>
-                    <li><strong>Haptic Feedback:</strong> Uses the device vibration motor for interaction confirmation and physical feedback.</li>
+                    <li><strong>Notifications & Alarms:</strong> Used for precise mission reminders and daily task updates to ensure you never break your daily streaks.</li>
+                    <li><strong>Calendar & Task Sync:</strong> If enabled, the app syncs your mission deadlines to your primary calendar so you can track your goals across all devices.</li>
+                    <li><strong>Media, Gallery & Video Access:</strong> Specifically required for the <strong>"Save Certificate"</strong> feature. While this permission includes video access for broad system compatibility, we only use it to save certificate images to your gallery.</li>
+                    <li><strong>Haptic Feedback:</strong> Uses the device motor for physical feedback when completing tasks.</li>
                 </ul>
             </section>
 
@@ -273,9 +275,9 @@
                 <h2><span>❌</span> 3. What We Do NOT Collect or Use</h2>
                 <p>For absolute clarity and your peace of mind, Remi Todo does NOT do the following:</p>
                 <ul>
+                    <li><strong>No Media Scraping:</strong> Although we ask for Media permission to <strong>save</strong> certificates, we do not read your existing photos or videos.</li>
                     <li><strong>No Background Audio:</strong> The app does not record or play audio in the background.</li>
                     <li><strong>No Real-time Location:</strong> We do not track or store your GPS coordinates or live location.</li>
-                    <li><strong>No Alarm Scheduling:</strong> As per our latest update, the app does not feature "Smart Alarms" or schedule exact system-level alarms.</li>
                     <li><strong>No Third-Party Advertising:</strong> We do not include third-party ads that track your behavior.</li>
                 </ul>
             </section>
