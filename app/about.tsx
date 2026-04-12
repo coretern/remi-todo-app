@@ -81,7 +81,7 @@ export default function AboutScreen() {
                 </View>
 
                 <View style={styles.footer}>
-                    <Text style={[styles.footerText, { color: colors.secondaryText }]}>Version 1.0.1 Premium</Text>
+                    <Text style={[styles.footerText, { color: colors.secondaryText }]}>Version 1.0.2 Premium</Text>
                 </View>
 
                 <View style={styles.developerArea}>

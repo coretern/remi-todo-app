@@ -1,4 +1,4 @@
-// Remi Todo App - Version 1.0.1 (Stable Build)
+// Remi Todo App - Version 1.0.2 (Stable Build)
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRouter } from 'expo-router';
 import React, { useRef, useState } from 'react';

@@ -46,7 +46,7 @@ export default function LegalScreen() {
                 </View>
 
                 <View style={styles.footer}>
-                    <Text style={[styles.footerText, { color: colors.secondaryText }]}>Version 1.0.1 Premium</Text>
+                    <Text style={[styles.footerText, { color: colors.secondaryText }]}>Version 1.0.2 Premium</Text>
                 </View>
             </ScrollView>
         </SafeAreaView>
