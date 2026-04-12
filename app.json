@@ -102,10 +102,6 @@
           ]
         }
       ],
-      [
-        "@notifee/react-native",
-        {}
-      ]
     ],
     "experiments": {
       "typedRoutes": true,
