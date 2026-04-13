@@ -59,7 +59,7 @@ export const styles = StyleSheet.create({
         opacity: 0.8,
     },
     deleteButton: {
-        width: 44,
+        width: 38,
         height: 44,
         alignItems: 'center',
         justifyContent: 'center',

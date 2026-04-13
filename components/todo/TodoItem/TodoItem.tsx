@@ -62,7 +62,7 @@ const TodoItem: React.FC<TodoItemProps> = ({ todo, onToggle, onDelete, onPin, on
     const timeInfo = getTimeRemaining(todo.dueDate);
 
     return (
-        <View style={[styles.container, { backgroundColor: colors.surface, borderColor: colors.border, paddingRight: 12 }]}>
+        <View style={[styles.container, { backgroundColor: colors.surface, borderColor: colors.border, paddingRight: 0 }]}>
             <View style={styles.content}>
                 <TouchableOpacity 
                     onPress={() => onToggle(todo.id)}
@@ -150,17 +150,18 @@ const TodoItem: React.FC<TodoItemProps> = ({ todo, onToggle, onDelete, onPin, on
                     </TouchableOpacity>
                 )}
                 {onPin && !todo.completed && (
-                    <TouchableOpacity onPress={() => onPin(todo.id)} style={{ padding: 8, opacity: todo.isPinned ? 1 : 0.35 }}>
+                    <TouchableOpacity onPress={() => onPin(todo.id)} style={{ paddingVertical: 6, paddingLeft: 6, paddingRight: 0, opacity: todo.isPinned ? 1 : 0.35 }}>
                         <Ionicons name={todo.isPinned ? "pin" : "pin-outline"} size={18} color={todo.isPinned ? colors.header : colors.secondaryText} />
                     </TouchableOpacity>
                 )}
                 <TouchableOpacity
                     onPress={() => onDelete(todo.id)}
-                    style={[styles.deleteButton, { marginLeft: 5 }]}
+                    style={[styles.deleteButton, { opacity: 0.5 }]}
                     activeOpacity={0.5}
                 >
                     <Ionicons name="close-circle-outline" size={22} color={colors.secondaryText} />
                 </TouchableOpacity>
+
             </View>
         </View>
     );

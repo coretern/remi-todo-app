@@ -116,7 +116,7 @@ export default function CertificateModal({ visible, selectedCert, onClose }: Pro
                                         <Ionicons name="shield-checkmark" size={24} color="#FFD700" />
                                         <View style={styles.sealTextCol}>
                                             <Text style={styles.sealText}>OFFICIAL REMI ACHIEVEMENT</Text>
-                                            <Text style={styles.sealUrlText}>www.remi-todo-app.vercel.app</Text>
+                                            <Text style={styles.sealUrlText}>https://remi-todo-app.vercel.app</Text>
                                         </View>
                                     </View>
                                 </View>
